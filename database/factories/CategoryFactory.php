@@ -1,0 +1,52 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Category;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Category>
+ */
+class CategoryFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = Category::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        $categoryNames = ['Pupuk', 'Bibit', 'Pestisida', 'Alat Pertanian', 'Benih', 'Media Tanam', 'Nutrisi', 'Obat-obatan'];
+        $icons = ['ph-plant', 'ph-seedling', 'ph-sprout', 'ph-tree'];
+
+        $name = fake()->randomElement($categoryNames).' '.fake()->unique()->numberBetween(1, 999);
+
+        return [
+            'name' => $name,
+            'slug' => Str::slug($name),
+            'description' => fake()->sentence(),
+            'icon' => fake()->randomElement($icons),
+            'sort_order' => fake()->numberBetween(0, 10),
+            'is_active' => true,
+        ];
+    }
+
+    /**
+     * Indicate that the category is inactive.
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
+    }
+}

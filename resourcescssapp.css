@@ -1,0 +1,80 @@
+/* ============================================
+   PERFORMANCE: CONTENT VISIBILITY ^& OPTIMIZATION
+   ============================================ */
+
+/* Content visibility for long lists */
+.content-visible {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 300px;
+}
+
+/* CSS containment for performance isolation */
+.contain-layout { contain: layout; }
+.contain-paint { contain: paint; }
+.contain-strict { contain: strict; }
+.contain-content { contain: content; }
+
+/* Prevent layout shift with aspect ratio containers */
+.aspect-product { aspect-ratio: 1 / 1; }
+.aspect-card { aspect-ratio: 4 / 3; }
+.aspect-hero { aspect-ratio: 16 / 9; }
+
+/* GPU acceleration for animations */
+.gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Optimize will-change usage */
+.will-change-transform { will-change: transform; }
+.will-change-opacity { will-change: opacity; }
+
+/* Image loading states */
+.img-loading { opacity: 0; }
+.img-loaded { opacity: 1; }
+
+/* Font display swap for faster text rendering */
+@font-face {
+    font-family: ^'Inter^';
+    font-display: swap;
+    src: local(^'Inter^'), local(^'Inter-Regular^');
+}
+
+/* Prevent FOIT */
+.font-sans { font-display: swap; }
+
+/* Scroll container optimization */
+.scroll-container {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize text rendering */
+.optimize-text {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Print optimization */
+@media print {
+    .no-print,
+    .sidebar,
+    .navbar,
+    .mobile-nav {
+        display: none !important;
+    }
+}

@@ -1,0 +1,191 @@
+@php
+$cartCount = 0;
+if(auth()->check()) {
+    $cart = \App\Models\Cart::where('user_id', auth()->id())->first();
+    if($cart) {
+        $cartCount = $cart->getTotalItems();
+    }
+}
+
+$authName = auth()->user()->name ?? 'User';
+$authEmail = auth()->user()->email ?? '-';
+@endphp
+
+<nav class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100" x-data="{ mobileMenu: false }">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            {{-- Logo --}}
+            <div class="flex items-center gap-8">
+                <a href="/user/dashboard" class="flex items-center gap-2 group">
+                    <img src="{{ asset('images/logo.png') }}" 
+                         alt="{{ config('app.store_name', 'Bintang Agung Tani') }}"
+                         class="h-10 w-auto object-contain group-hover:scale-105 transition-transform">
+                </a>
+                
+                {{-- Desktop Navigation --}}
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="/user/produk" class="nav-link {{ request()->is('user/produk') ? 'text-emerald-600' : '' }}">Produk</a>
+                    <a href="/user/keranjang" class="nav-link {{ request()->is('user/keranjang') ? 'text-emerald-600' : '' }}">Keranjang</a>
+                    <a href="/user/riwayat" class="nav-link {{ request()->is('user/riwayat') ? 'text-emerald-600' : '' }}">Pesanan</a>
+                </div>
+            </div>
+            
+            {{-- Right Side Actions --}}
+            <div class="flex items-center gap-4">
+                {{-- Search Bar (Desktop) --}}
+                <div class="hidden md:block relative">
+                    <input type="text" 
+                           placeholder="Cari produk..." 
+                           class="search-bar-desktop"
+                           aria-label="Cari produk"
+                           onkeyup="if(event.key==='Enter') window.location.href='/user/produk?search='+this.value">
+                </div>
+                
+                {{-- Cart --}}
+                <button @click="$dispatch('toggle-cart')" 
+                        class="relative icon-button text-gray-600 hover:text-emerald-600 hover:bg-gray-100 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                        aria-label="Keranjang belanja">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    @if($cartCount > 0)
+                        <span class="cart-badge">{{ $cartCount > 99 ? '99+' : $cartCount }}</span>
+                    @endif
+                </button>
+                
+                {{-- User Menu --}}
+                <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                    <button @click="open = !open" 
+                            class="flex items-center gap-2 icon-button rounded-lg hover:bg-gray-50 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none"
+                            aria-label="Menu pengguna">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($authName) }}&background=ecfdf5&color=059669&size=32" 
+                             alt="{{ $authName }}" 
+                             class="w-8 h-8 rounded-full object-cover">
+                        <span class="hidden md:inline text-sm font-medium text-gray-700">{{ $authName }}</span>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    
+                    {{-- Dropdown --}}
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
+                         style="display: none;"
+                         role="menu">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p class="text-sm font-semibold text-gray-900">{{ $authName }}</p>
+                            <p class="text-xs text-gray-500">{{ $authEmail }}</p>
+                        </div>
+                        <a href="/user/profil" 
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                           role="menuitem">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg> Profil
+                        </a>
+                        <a href="/user/riwayat" 
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                           role="menuitem">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg> Pesanan
+                        </a>
+                        <a href="/user/bantuan" 
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                           role="menuitem">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg> Bantuan
+                        </a>
+                        <div class="border-t border-gray-100 mt-1 pt-1">
+                            <form action="/logout" method="POST" role="menuitem">
+                                @csrf
+                            <button type="submit" 
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-inset rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg> Keluar
+                            </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                {{-- Mobile Menu Button --}}
+                <div class="md:hidden">
+                    <button @click="mobileMenu = !mobileMenu" 
+                            class="icon-button text-gray-600 hover:text-emerald-600 hover:bg-gray-100 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                            aria-label="Toggle menu">
+                        <svg class="w-6 h-6" :class="{ 'hidden': mobileMenu }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <svg class="w-6 h-6" :class="{ 'hidden': !mobileMenu }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        {{-- Mobile Menu --}}
+        <div x-show="mobileMenu"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             class="md:hidden py-3 border-t border-gray-100"
+             style="display: none;"
+             role="navigation"
+             aria-label="Mobile menu">
+            <div class="flex flex-col gap-1">
+                <a href="/user/dashboard" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors {{ request()->is('user/dashboard') ? 'bg-emerald-50 text-emerald-700 font-medium' : '' }}">
+                    <svg class="w-5 h-5 {{ request()->is('user/dashboard') ? 'text-emerald-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/user/produk" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors {{ request()->is('user/produk') ? 'bg-emerald-50 text-emerald-700 font-medium' : '' }}">
+                    <svg class="w-5 h-5 {{ request()->is('user/produk') ? 'text-emerald-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    <span>Produk</span>
+                </a>
+                <a href="/user/keranjang" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors {{ request()->is('user/keranjang') ? 'bg-emerald-50 text-emerald-700 font-medium' : '' }}">
+                    <svg class="w-5 h-5 {{ request()->is('user/keranjang') ? 'text-emerald-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <span>Keranjang</span>
+                    @if($cartCount > 0)
+                        <span class="ml-auto bg-emerald-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $cartCount }}</span>
+                    @endif
+                </a>
+                <a href="/user/riwayat" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors {{ request()->is('user/riwayat') ? 'bg-emerald-50 text-emerald-700 font-medium' : '' }}">
+                    <svg class="w-5 h-5 {{ request()->is('user/riwayat') ? 'text-emerald-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    <span>Pesanan</span>
+                </a>
+                <hr class="my-2 border-gray-100">
+                <a href="/user/profil" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors {{ request()->is('user/profil') ? 'bg-emerald-50 text-emerald-700 font-medium' : '' }}">
+                    <svg class="w-5 h-5 {{ request()->is('user/profil') ? 'text-emerald-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span>Profil</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
