@@ -37,15 +37,15 @@ class OrderBarcodeVisibilityTest extends TestCase
     }
 
     /**
-     * Test that barcode is NOT visible when order is in payment_pending status
+     * Test that barcode is NOT visible when order is in pending status
      */
-    public function test_barcode_not_visible_for_payment_pending_status(): void
+    public function test_barcode_not_visible_for_pending_status(): void
     {
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
             'address_id' => $this->address->id,
             'payment_method_id' => $this->paymentMethod->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
             'total_amount' => 100000,
             'qr_code_path' => 'qr-codes/test.png',
         ]);
@@ -58,7 +58,7 @@ class OrderBarcodeVisibilityTest extends TestCase
         $response->assertDontSee('Lihat Barcode QR', false);
         $response->assertDontSee('Barang Siap Diambil!', false);
         // Should show waiting for payment message instead
-        $response->assertSee('Menunggu Pembayaran', false);
+        $response->assertSee('Belum Bayar', false);
     }
 
     /**
@@ -120,51 +120,6 @@ class OrderBarcodeVisibilityTest extends TestCase
         $response->assertSee('Diproses', false);
     }
 
-    /**
-     * Test that barcode IS visible for shipped status
-     */
-    public function test_barcode_visible_for_shipped_status(): void
-    {
-        $order = Order::factory()->create([
-            'user_id' => $this->user->id,
-            'address_id' => $this->address->id,
-            'payment_method_id' => $this->paymentMethod->id,
-            'status' => Order::STATUS_SHIPPED,
-            'total_amount' => 100000,
-            'paid_amount' => 100000,
-            'qr_code_path' => 'qr-codes/test.png',
-        ]);
-
-        $response = $this->actingAs($this->user)
-            ->get(route('user.orders.show', $order));
-
-        $response->assertOk();
-        $response->assertSee('Lihat Barcode QR', false);
-        $response->assertSee('Barang Siap Diambil!', false);
-    }
-
-    /**
-     * Test that barcode IS visible for delivered status
-     */
-    public function test_barcode_visible_for_delivered_status(): void
-    {
-        $order = Order::factory()->create([
-            'user_id' => $this->user->id,
-            'address_id' => $this->address->id,
-            'payment_method_id' => $this->paymentMethod->id,
-            'status' => Order::STATUS_DELIVERED,
-            'total_amount' => 100000,
-            'paid_amount' => 100000,
-            'qr_code_path' => 'qr-codes/test.png',
-        ]);
-
-        $response = $this->actingAs($this->user)
-            ->get(route('user.orders.show', $order));
-
-        $response->assertOk();
-        $response->assertSee('Lihat Barcode QR', false);
-        $response->assertSee('Barang Siap Diambil!', false);
-    }
 
     /**
      * Test that barcode IS visible for completed status
@@ -217,10 +172,8 @@ class OrderBarcodeVisibilityTest extends TestCase
     {
         $unverifiedStatuses = [
             Order::STATUS_PENDING,
-            Order::STATUS_PAYMENT_PENDING,
             Order::STATUS_MENUNGGU_VERIFIKASI,
             Order::STATUS_CANCELLED,
-            Order::STATUS_REFUNDED,
         ];
 
         foreach ($unverifiedStatuses as $status) {
@@ -240,8 +193,6 @@ class OrderBarcodeVisibilityTest extends TestCase
     {
         $verifiedStatuses = [
             Order::STATUS_PROCESSING,
-            Order::STATUS_SHIPPED,
-            Order::STATUS_DELIVERED,
             Order::STATUS_COMPLETED,
         ];
 
@@ -280,7 +231,7 @@ class OrderBarcodeVisibilityTest extends TestCase
     {
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
         ]);
 
         $this->assertFalse($order->hasPaymentProof());
@@ -294,10 +245,8 @@ class OrderBarcodeVisibilityTest extends TestCase
         // Should NOT be able to view for these statuses
         $cannotViewStatuses = [
             Order::STATUS_PENDING,
-            Order::STATUS_PAYMENT_PENDING,
             Order::STATUS_MENUNGGU_VERIFIKASI,
             Order::STATUS_CANCELLED,
-            Order::STATUS_REFUNDED,
         ];
 
         foreach ($cannotViewStatuses as $status) {
@@ -312,8 +261,6 @@ class OrderBarcodeVisibilityTest extends TestCase
         // SHOULD be able to view for these statuses
         $canViewStatuses = [
             Order::STATUS_PROCESSING,
-            Order::STATUS_SHIPPED,
-            Order::STATUS_DELIVERED,
             Order::STATUS_COMPLETED,
         ];
 
@@ -333,11 +280,9 @@ class OrderBarcodeVisibilityTest extends TestCase
     public function test_status_badge_shows_correct_text(): void
     {
         $statusMap = [
-            Order::STATUS_PAYMENT_PENDING => 'Menunggu Pembayaran',
+            Order::STATUS_PENDING => 'Belum Bayar',
             Order::STATUS_MENUNGGU_VERIFIKASI => 'Menunggu Verifikasi',
             Order::STATUS_PROCESSING => 'Diproses',
-            Order::STATUS_SHIPPED => 'Dikirim',
-            Order::STATUS_DELIVERED => 'Terkirim',
             Order::STATUS_COMPLETED => 'Selesai',
             Order::STATUS_CANCELLED => 'Dibatalkan',
         ];
@@ -362,17 +307,17 @@ class OrderBarcodeVisibilityTest extends TestCase
      */
     public function test_payment_status_badge_shows_correctly(): void
     {
-        // Order with no payment - should show "Belum Dibayar"
+        // Order with no payment - should show "Belum Bayar"
         $unpaidOrder = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
             'paid_amount' => 0,
         ]);
 
         $response = $this->actingAs($this->user)
             ->get(route('user.orders.show', $unpaidOrder));
 
-        $response->assertSee('Belum Dibayar', false);
+        $response->assertSee('Belum Bayar', false);
 
         // Order with payment pending verification
         $pendingOrder = Order::factory()->create([

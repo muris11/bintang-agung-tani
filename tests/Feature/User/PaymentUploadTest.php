@@ -234,7 +234,7 @@ class PaymentUploadTest extends TestCase
         $user = User::factory()->create();
         $order = Order::factory()->create([
             'user_id' => $user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
             'payment_method_id' => $this->paymentMethod->id,
         ]);
 
@@ -260,7 +260,7 @@ class PaymentUploadTest extends TestCase
         $user = User::factory()->create();
         $order = Order::factory()->create([
             'user_id' => $user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
             'payment_method_id' => $this->paymentMethod->id,
             'total_amount' => 100000,
         ]);

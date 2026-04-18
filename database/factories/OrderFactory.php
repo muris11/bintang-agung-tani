@@ -33,10 +33,8 @@ class OrderFactory extends Factory
 
         $status = fake()->randomElement([
             Order::STATUS_PENDING,
-            Order::STATUS_PAYMENT_PENDING,
+            Order::STATUS_MENUNGGU_VERIFIKASI,
             Order::STATUS_PROCESSING,
-            Order::STATUS_SHIPPED,
-            Order::STATUS_DELIVERED,
             Order::STATUS_COMPLETED,
             Order::STATUS_CANCELLED,
         ]);
@@ -45,10 +43,9 @@ class OrderFactory extends Factory
         $address = $useAddress ? Address::factory()->create() : null;
 
         $paidAmount = match ($status) {
-            Order::STATUS_COMPLETED, Order::STATUS_DELIVERED => $totalAmount,
-            Order::STATUS_SHIPPED => $totalAmount,
-            Order::STATUS_PROCESSING => $totalAmount,
-            Order::STATUS_PENDING, Order::STATUS_PAYMENT_PENDING => fake()->boolean(30) ? fake()->numberBetween(0, $totalAmount) : 0,
+            Order::STATUS_PROCESSING, Order::STATUS_COMPLETED => $totalAmount,
+            Order::STATUS_MENUNGGU_VERIFIKASI => fake()->boolean(80) ? $totalAmount : fake()->numberBetween(0, $totalAmount),
+            Order::STATUS_PENDING => fake()->boolean(30) ? fake()->numberBetween(0, $totalAmount) : 0,
             Order::STATUS_CANCELLED => fake()->boolean(50) ? fake()->numberBetween(0, $totalAmount) : 0,
             default => 0,
         };
@@ -108,6 +105,21 @@ class OrderFactory extends Factory
     }
 
     /**
+     * Indicate that the order is waiting for verification.
+     */
+    public function menungguVerifikasi(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => Order::STATUS_MENUNGGU_VERIFIKASI,
+                'paid_amount' => $attributes['total_amount'],
+                'paid_at' => fake()->dateTimeBetween('-30 days', 'now'),
+                'tracking_number' => null,
+            ];
+        });
+    }
+
+    /**
      * Indicate that the order is completed.
      */
     public function completed(): static
@@ -137,18 +149,5 @@ class OrderFactory extends Factory
         });
     }
 
-    /**
-     * Indicate that the order is shipped.
-     */
-    public function shipped(): static
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => Order::STATUS_SHIPPED,
-                'paid_amount' => $attributes['total_amount'],
-                'paid_at' => fake()->dateTimeBetween('-30 days', '-5 days'),
-                'tracking_number' => fake()->regexify('[A-Z]{2}[0-9]{9,12}'),
-            ];
-        });
-    }
 }
+

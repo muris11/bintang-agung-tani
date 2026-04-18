@@ -58,12 +58,11 @@
                     <select name="status" required
                             class="form-input h-11 bg-white border-gray-200 py-0 text-sm font-medium min-w-[200px]">
                         <option value="">-- Pilih Status Baru --</option>
-                        <option value="payment_pending">Menunggu Pembayaran</option>
+                        <option value="pending">Belum Bayar</option>
                         <option value="menunggu_verifikasi">Menunggu Verifikasi</option>
-                        <option value="diproses">Sedang Diproses</option>
-                        <option value="dikirim">Dikirim</option>
-                        <option value="selesai">Selesai</option>
-                        <option value="dibatalkan">Dibatalkan</option>
+                        <option value="processing">Diproses</option>
+                        <option value="completed">Selesai</option>
+                        <option value="cancelled">Dibatalkan</option>
                     </select>
                     <button type="submit" 
                             :disabled="selectedOrders.length === 0"
@@ -128,20 +127,18 @@
                             <td class="px-4 py-4 text-center">
                                 @php
                                     $statusLabels = [
-                                        'payment_pending' => 'Menunggu Bayar',
+                                        'pending' => 'Belum Bayar',
                                         'menunggu_verifikasi' => 'Menunggu Verifikasi',
-                                        'diproses' => 'Diproses',
-                                        'dikirim' => 'Dikirim',
-                                        'selesai' => 'Selesai',
-                                        'dibatalkan' => 'Dibatalkan',
+                                        'processing' => 'Diproses',
+                                        'completed' => 'Selesai',
+                                        'cancelled' => 'Dibatalkan',
                                     ];
                                     $statusColors = [
-                                        'payment_pending' => 'bg-gray-100 text-gray-600 border-gray-200',
+                                        'pending' => 'bg-gray-100 text-gray-600 border-gray-200',
                                         'menunggu_verifikasi' => 'bg-orange-100 text-orange-700 border-orange-200',
-                                        'diproses' => 'bg-blue-100 text-blue-700 border-blue-200',
-                                        'dikirim' => 'bg-indigo-100 text-indigo-700 border-indigo-200',
-                                        'selesai' => 'bg-green-100 text-green-700 border-green-200',
-                                        'dibatalkan' => 'bg-red-100 text-red-700 border-red-200',
+                                        'processing' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                        'completed' => 'bg-green-100 text-green-700 border-green-200',
+                                        'cancelled' => 'bg-red-100 text-red-700 border-red-200',
                                     ];
                                     $currentStatus = $order->status;
                                 @endphp

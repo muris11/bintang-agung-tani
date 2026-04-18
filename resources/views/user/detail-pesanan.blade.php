@@ -92,7 +92,7 @@ use App\Models\Setting;
                         <i class="ph ph-credit-card ph-duotone w-6 h-6"></i>
                     </div>
                     <div>
-                        <h3 class="font-black text-orange-800 text-lg mb-1 tracking-tight">Menunggu Pembayaran</h3>
+                        <h3 class="font-black text-orange-800 text-lg mb-1 tracking-tight">Belum Bayar</h3>
                         <p class="text-sm text-orange-700 font-medium leading-relaxed">Silakan lakukan pembayaran dan upload bukti pembayaran untuk melanjutkan pesanan Anda.</p>
                     </div>
                 </div>
@@ -115,13 +115,13 @@ use App\Models\Setting;
                     @forelse($order->items as $item)
                     <div class="p-6 flex flex-col sm:flex-row items-start gap-5 hover:bg-gray-50/30 transition-colors">
                         <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-gray-100 border border-gray-200 shrink-0 overflow-hidden shadow-sm">
-                            <img loading="lazy" src="{{ $item->product->getFirstImage() ?? asset('images/placeholder-product.png') }}" alt="{{ $item->product_name }}" class="w-full h-full object-cover">
+                            <img loading="lazy" src="{{ $item->product ? ($item->product->getFirstImage() ?? asset('images/placeholder-product.png')) : asset('images/placeholder-product.png') }}" alt="{{ $item->product_name }}" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-grow flex flex-col justify-between w-full">
                             <div class="flex flex-col sm:flex-row justify-between sm:items-start gap-2">
                                 <div>
                                     <h3 class="font-bold text-gray-900 text-base sm:text-lg leading-tight mb-1">{{ $item->product_name }}</h3>
-                                    <p class="text-gray-500 text-xs sm:text-sm font-medium">{{ $item->product->category->name ?? '-' }}</p>
+                                    <p class="text-gray-500 text-xs sm:text-sm font-medium">{{ $item->product ? ($item->product->category->name ?? '-') : '-' }}</p>
                                 </div>
                                 <div class="text-left sm:text-right mt-1 sm:mt-0">
                                     <p class="font-black text-gray-900 text-lg">{{ $item->getFormattedSubtotal() }}</p>
@@ -219,9 +219,45 @@ use App\Models\Setting;
                     </div>
                 </div>
                 
-                <a href="{{ route('user.payments.show-upload', $order) }}" class="btn-secondary w-full mt-6 text-sm font-semibold h-11 border-gray-200 bg-gray-50">
-                    <i class="ph ph-image w-4 h-4 mr-1.5"></i> Lihat Bukti Pembayaran Saya
-                </a>
+                @php
+                    $latestProof = $order->latestPaymentProof;
+                @endphp
+
+                @if($latestProof)
+                    <!-- Bukti Pembayaran Info -->
+                    <div class="mt-6 pt-6 border-t border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm font-medium text-gray-700">Bukti Pembayaran</span>
+                            <span class="inline-flex py-1 px-2.5 text-[10px] font-bold uppercase tracking-wider rounded
+                                @if($latestProof->status === 'pending') bg-yellow-100 text-yellow-700 border border-yellow-200
+                                @elseif($latestProof->status === 'verified') bg-green-100 text-green-700 border border-green-200
+                                @else bg-red-100 text-red-700 border border-red-200 @endif">
+                                {{ $latestProof->getStatusLabel() }}
+                            </span>
+                        </div>
+                        <a href="{{ $latestProof->getImageUrl() }}" target="_blank" class="block relative group">
+                            <img src="{{ $latestProof->getImageUrl() }}" alt="Bukti Pembayaran" class="w-full h-40 object-cover rounded-xl border border-gray-200">
+                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                                <span class="text-white font-medium text-sm flex items-center gap-2">
+                                    <i class="ph ph-eye w-4 h-4"></i> Lihat Detail
+                                </span>
+                            </div>
+                        </a>
+                        <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                            <i class="ph ph-clock w-3 h-3"></i>
+                            Diupload {{ $latestProof->created_at->diffForHumans() }}
+                        </p>
+                        @if($latestProof->admin_notes)
+                            <div class="mt-3 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
+                                <span class="font-semibold">Catatan Admin:</span> {{ $latestProof->admin_notes }}
+                            </div>
+                        @endif
+                    </div>
+                @elseif($order->canUploadProof())
+                    <a href="{{ route('user.payments.show-upload', $order) }}" class="btn-primary w-full mt-6 text-sm font-semibold h-11">
+                        <i class="ph ph-upload w-4 h-4 mr-1.5"></i> Upload Bukti Pembayaran
+                    </a>
+                @endif
             </div>
             
             <!-- Tracking Log Widget -->

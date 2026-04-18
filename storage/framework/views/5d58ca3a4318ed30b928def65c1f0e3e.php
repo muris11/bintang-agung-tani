@@ -46,6 +46,8 @@ use App\Models\Setting;
             </main>
         </div>
     </div>
+    
+    <?php echo $__env->yieldContent('scripts'); ?>
 </body>
 </html>
 

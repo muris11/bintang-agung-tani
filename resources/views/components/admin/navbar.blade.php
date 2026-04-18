@@ -1,9 +1,12 @@
 @php
     use App\Models\Setting;
+    use App\Models\ContactMessage;
 
     $authName = auth()->user()->name ?? 'Admin';
     $avatarName = urlencode($authName);
     $storeName = Setting::get('store_name', 'Bintang Agung Tani');
+    $unreadNotificationsCount = auth()->user()->unreadNotifications()->count();
+    $unreadMessagesCount = ContactMessage::unread()->count();
 @endphp
 
 <header
@@ -52,23 +55,122 @@
     <!-- Right Section: Actions & Profile -->
     <div class="flex items-center gap-3 sm:gap-4 shrink-0">
         <!-- Notification -->
-        <button type="button"
-            class="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all touch-target group"
-            aria-label="Notifications">
-            <i class="ph ph-bell w-5 h-5 group-hover:scale-110 transition-transform"></i>
-            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-400 rounded-full border-2 border-primary-600"
-                aria-hidden="true"></span>
-        </button>
+        <div class="relative" x-data="{ notificationOpen: false }" @click.away="notificationOpen = false">
+            <button type="button" @click="notificationOpen = !notificationOpen"
+                class="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all touch-target group"
+                aria-label="Notifications">
+                <i class="ph ph-bell w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                @if($unreadNotificationsCount > 0)
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-400 rounded-full border-2 border-primary-600"
+                        aria-hidden="true"></span>
+                @endif
+            </button>
+
+            <!-- Notification Dropdown -->
+            <div x-show="notificationOpen" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="transform opacity-0 scale-95 -translate-y-2"
+                x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="transform opacity-0 scale-95 -translate-y-2"
+                class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-floating border border-gray-100 py-2 z-50 origin-top-right"
+                style="display: none;">
+                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="font-semibold text-gray-900 text-sm">Notifikasi</h3>
+                    @if($unreadNotificationsCount > 0)
+                        <span class="text-xs font-medium text-primary-600">{{ $unreadNotificationsCount }} baru</span>
+                    @endif
+                </div>
+                <div class="max-h-80 overflow-y-auto">
+                    @php
+                        $recentNotifications = auth()->user()->unreadNotifications()->take(5)->get();
+                    @endphp
+                    @if($recentNotifications->count() > 0)
+                        @foreach($recentNotifications as $notification)
+                            <div class="px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0">
+                                <p class="text-sm font-medium text-gray-900">{{ $notification->data['title'] ?? 'Notifikasi' }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ $notification->data['message'] ?? '' }}</p>
+                                <p class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="px-4 py-6 text-center">
+                            <i class="ph ph-bell-slash w-8 h-8 text-gray-300 mx-auto mb-2"></i>
+                            <p class="text-sm text-gray-400">Tidak ada notifikasi baru</p>
+                        </div>
+                    @endif
+                </div>
+                <div class="border-t border-gray-100 px-4 py-2">
+                    <a href="{{ route('admin.notifications.index') }}" class="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center justify-center gap-1">
+                        Lihat semua notifikasi
+                        <i class="ph ph-arrow-right w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
 
         <!-- Message/Inbox -->
-        <button type="button"
-            class="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all touch-target group"
-            aria-label="Messages">
-            <i class="ph ph-envelope-simple w-5 h-5 group-hover:scale-110 transition-transform"></i>
-            <span
-                class="absolute -top-0.5 -right-0.5 text-[10px] font-bold bg-amber-400 text-white w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-600"
-                aria-hidden="true">16</span>
-        </button>
+        <div class="relative" x-data="{ messageOpen: false }" @click.away="messageOpen = false">
+            <button type="button" @click="messageOpen = !messageOpen"
+                class="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all touch-target group"
+                aria-label="Messages">
+                <i class="ph ph-envelope-simple w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                @if($unreadMessagesCount > 0)
+                    <span
+                        class="absolute -top-0.5 -right-0.5 text-[10px] font-bold bg-amber-400 text-white w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-600"
+                        aria-hidden="true">{{ $unreadMessagesCount > 9 ? '9+' : $unreadMessagesCount }}</span>
+                @endif
+            </button>
+
+            <!-- Messages Dropdown -->
+            <div x-show="messageOpen" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="transform opacity-0 scale-95 -translate-y-2"
+                x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="transform opacity-0 scale-95 -translate-y-2"
+                class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-floating border border-gray-100 py-2 z-50 origin-top-right"
+                style="display: none;">
+                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="font-semibold text-gray-900 text-sm">Pesan Masuk</h3>
+                    @if($unreadMessagesCount > 0)
+                        <span class="text-xs font-medium text-amber-600">{{ $unreadMessagesCount }} belum dibaca</span>
+                    @endif
+                </div>
+                <div class="max-h-80 overflow-y-auto">
+                    @php
+                        $recentMessages = \App\Models\ContactMessage::unread()->orderBy('created_at', 'desc')->take(5)->get();
+                    @endphp
+                    @if($recentMessages->count() > 0)
+                        @foreach($recentMessages as $message)
+                            <a href="{{ route('admin.messages.show', $message->id) }}" class="block px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+                                        <i class="ph ph-envelope-simple w-4 h-4"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">{{ $message->name }}</p>
+                                        <p class="text-xs text-gray-600 truncate">{{ $message->subject }}</p>
+                                        <p class="text-xs text-gray-400 mt-0.5">{{ $message->created_at->diffForHumans() }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    @else
+                        <div class="px-4 py-6 text-center">
+                            <i class="ph ph-envelope-slash w-8 h-8 text-gray-300 mx-auto mb-2"></i>
+                            <p class="text-sm text-gray-400">Tidak ada pesan baru</p>
+                        </div>
+                    @endif
+                </div>
+                <div class="border-t border-gray-100 px-4 py-2">
+                    <a href="{{ route('admin.messages.index') }}" class="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center justify-center gap-1">
+                        Lihat semua pesan
+                        <i class="ph ph-arrow-right w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
 
         <!-- Divider -->
         <div class="w-px h-6 bg-white/20 hidden sm:block"></div>

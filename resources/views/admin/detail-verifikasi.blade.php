@@ -17,8 +17,8 @@
             </nav>
             <div class="flex items-center gap-3">
                 <h1 class="text-[28px] md:text-3xl font-bold text-gray-900 tracking-tight">Dokumen Bukti Transfer</h1>
-                <span class="inline-flex px-2.5 py-1 text-xs font-bold rounded-full {{ $payment->isPending() ? 'bg-orange-100 text-orange-700 border border-orange-200' : ($payment->isSuccess() ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200') }} mt-1.5 shadow-sm">
-                    {{ $payment->isPending() ? 'Review Tertunda' : ($payment->isSuccess() ? 'Terverifikasi' : 'Ditolak') }}
+                <span class="inline-flex px-2.5 py-1 text-xs font-bold rounded-full {{ $payment->isPending() ? 'bg-orange-100 text-orange-700 border border-orange-200' : ($payment->isVerified() ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200') }} mt-1.5 shadow-sm">
+                    {{ $payment->isPending() ? 'Menunggu Verifikasi' : ($payment->isVerified() ? 'Terverifikasi' : 'Ditolak') }}
                 </span>
             </div>
             <p class="text-sm text-gray-500 mt-1">Lakukan konfirmasi mutasi rekening sebelum pesanan diteruskan ke bagian pengiriman.</p>
@@ -31,10 +31,10 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        
+
         <!-- Kolom Kiri: Bukti Pembayaran -->
         <div class="space-y-6">
-            <div class="card p-0 overflow-hidden border-t-4 border-t-orange-500">
+            <div class="card p-0 overflow-hidden border-t-4 border-t-{{ $payment->isPending() ? 'orange' : ($payment->isVerified() ? 'green' : 'red') }}-500">
                 <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
@@ -44,15 +44,17 @@
                     </div>
                     <div class="flex gap-2">
                         <button class="btn-secondary h-8 px-3 py-0 text-xs shadow-sm bg-white" @click="showImageModal = true"><i class="ph ph-arrows-out w-3.5 h-3.5 mr-1"></i> Fullscreen</button>
-                        <a href="{{ $payment->order && $payment->order->latestPaymentProof ? $payment->order->latestPaymentProof->getImageUrl() : '#' }}" download class="btn-secondary h-8 px-3 py-0 text-xs shadow-sm bg-white {{ !$payment->order || !$payment->order->latestPaymentProof ? 'opacity-50 cursor-not-allowed' : '' }}"><i class="ph ph-download-simple w-3.5 h-3.5 mr-1"></i> Unduh</a>
+                        @if($payment->image_path)
+                        <a href="{{ $payment->getImageUrl() }}" download class="btn-secondary h-8 px-3 py-0 text-xs shadow-sm bg-white"><i class="ph ph-download-simple w-3.5 h-3.5 mr-1"></i> Unduh</a>
+                        @endif
                     </div>
                 </div>
-                
+
                 <div class="p-6">
                     <!-- Image Preview Area -->
                     <div class="relative w-full rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center" style="min-height: 400px; max-height: 600px;">
-                        @if($payment->order && $payment->order->latestPaymentProof && $payment->order->latestPaymentProof->image_url)
-                            <img loading="lazy" src="{{ $payment->order->latestPaymentProof->image_url }}" alt="Bukti Transfer" class="max-w-full max-h-[600px] object-contain shadow-sm border border-gray-200">
+                        @if($payment->image_path)
+                            <img loading="lazy" src="{{ $payment->getImageUrl() }}" alt="Bukti Transfer" class="max-w-full max-h-[600px] object-contain shadow-sm border border-gray-200">
                         @else
                             <div class="text-center text-gray-400">
                                 <i class="ph ph-image w-16 h-16 mx-auto mb-2"></i>
@@ -63,22 +65,24 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Kolom Kanan: Detail Pesanan & Aksi -->
         <div class="space-y-6">
-            
+
             <!-- Ringkasan Info Pesanan -->
             <div class="card p-6">
                 <h3 class="text-lg font-bold text-gray-900 mb-5 pb-3 border-b border-gray-100 flex items-center justify-between">
                     Data Referensi Transaksi
-                    <a href="/admin/detail-pesanan" class="text-xs font-semibold text-primary-600 flex items-center gap-1 hover:text-primary-700 bg-primary-50 px-2 py-1 rounded-md transition-colors"><i class="ph ph-note w-4 h-4"></i> Detail Cart</a>
+                    <a href="{{ route('admin.orders.show', $payment->order) }}" class="text-xs font-semibold text-primary-600 flex items-center gap-1 hover:text-primary-700 bg-primary-50 px-2 py-1 rounded-md transition-colors">
+                        <i class="ph ph-note w-4 h-4"></i> Detail Pesanan
+                    </a>
                 </h3>
-                
+
                 <!-- Tagihan Box -->
                 <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 mb-6 flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Nilai Mutasi Rekening</p>
-                        <p class="text-3xl font-black text-gray-900 leading-none">{{ $payment->getFormattedAmount() }}</p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Nilai Pesanan</p>
+                        <p class="text-3xl font-black text-gray-900 leading-none">{{ $payment->order->getFormattedTotal() }}</p>
                     </div>
                     <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
                         <i class="ph ph-money ph-duotone w-6 h-6"></i>
@@ -91,7 +95,7 @@
                         <span class="font-bold text-gray-900">{{ $payment->order->order_number ?? 'N/A' }}</span>
                     </div>
                     <div class="flex justify-between items-center pb-3 border-b border-gray-100">
-                        <span class="text-gray-500 font-medium text-sm">Waktu Transaksi</span>
+                        <span class="text-gray-500 font-medium text-sm">Waktu Upload</span>
                         <span class="font-semibold text-gray-900 text-sm">{{ $payment->created_at->format('d M Y, H:i') }} WIB</span>
                     </div>
                     <div class="flex justify-between items-start pb-3 border-b border-gray-100">
@@ -104,13 +108,23 @@
                     <div class="flex justify-between items-center pb-3 border-gray-100">
                         <span class="text-gray-500 font-medium text-sm">Kanal Pembayaran</span>
                         <span class="font-bold text-gray-900 flex items-center gap-2 text-sm text-right">
-                            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-black italic border border-blue-100">{{ strtoupper($payment->payment_method) }}</span> Transfer Bank
+                            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-black italic border border-blue-100">{{ strtoupper($payment->paymentMethod->code ?? $payment->paymentMethod->name ?? '-') }}</span> Transfer Bank
                         </span>
                     </div>
+                    @if($payment->notes)
+                    <div class="flex justify-between items-start pt-2 border-t border-gray-100">
+                        <span class="text-gray-500 font-medium text-sm">Catatan Pelanggan</span>
+                        <span class="text-sm text-gray-700 text-right max-w-xs">{{ $payment->notes }}</span>
+                    </div>
+                    @endif
                 </div>
             </div>
 
             <!-- Tindakan Keputusan -->
+            @php
+                $manualPayment = $payment->order?->payments()->where('provider', 'manual')->latest()->first();
+            @endphp
+            @if($payment->isPending())
             <div class="card p-6 border-t-4 border-t-primary-500">
                 <div class="flex items-center gap-2 mb-3">
                     <div class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
@@ -118,32 +132,67 @@
                     </div>
                     <h2 class="text-lg font-bold text-gray-900">Putusan Verifikasi</h2>
                 </div>
-                
+
                 <p class="text-sm text-gray-600 mb-6 font-medium leading-relaxed">
-                    Pastikan dana <strong class="text-gray-900">{{ $payment->getFormattedAmount() }}</strong> sudah efektif masuk ke rekening mutasi Bank {{ strtoupper($payment->payment_method) }} sebelum menyetujui. Tindakan ini tidak dapat dibatalkan dan akan langsung meneruskan pesanan ke tahap Pengepakan.
+                    Pastikan dana <strong class="text-gray-900">{{ $payment->order->getFormattedTotal() }}</strong> sudah efektif masuk ke rekening mutasi Bank {{ strtoupper($payment->paymentMethod->name ?? $payment->paymentMethod->code ?? '') }} sebelum menyetujui. Tindakan ini tidak dapat dibatalkan dan akan langsung meneruskan pesanan ke tahap Pengepakan.
                 </p>
-                
-                <form action="{{ route('admin.verifikasi.approve', $payment) }}" method="POST" class="space-y-4">
+
+                <form action="{{ route('admin.verifikasi.approve', $manualPayment ?? $payment) }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <button type="submit" class="btn-primary flex-1 h-12 shadow-md bg-green-600 hover:bg-green-700 hover:border-green-600 border-green-600 focus:ring-green-500/30" {{ !$payment->isPending() ? 'disabled' : '' }}>
+                        <button type="submit" class="btn-primary flex-1 h-12 shadow-md bg-green-600 hover:bg-green-700 hover:border-green-600 border-green-600 focus:ring-green-500/30">
                             <i class="ph ph-check-circle ph-bold w-5 h-5 mr-1.5"></i> Sesuai & Lanjutkan
                         </button>
                     </div>
                 </form>
-                    
-                <form action="{{ route('admin.verifikasi.reject', $payment) }}" method="POST" class="pt-4 border-t border-gray-100 border-dashed">
+
+                <form action="{{ route('admin.verifikasi.reject', $manualPayment ?? $payment) }}" method="POST" class="pt-4 border-t border-gray-100 border-dashed">
                     @csrf
                     <label class="form-label block mb-1.5 text-xs font-bold text-gray-500 uppercase tracking-widest">Tunda atau Tolak Pembayaran</label>
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <input type="text" name="reason" placeholder="Alasan penolakan (misal: Nominal kurang)" class="form-input flex-1 text-sm bg-gray-50/50" {{ !$payment->isPending() ? 'disabled' : '' }}>
-                        <button type="submit" class="btn-primary h-10 shadow-md bg-red-600 hover:bg-red-700 hover:border-red-600 border-red-600 focus:ring-red-500/30 px-6 sm:w-auto w-full" {{ !$payment->isPending() ? 'disabled' : '' }}>
+                        <input type="text" name="reason" placeholder="Alasan penolakan (misal: Nominal kurang)" class="form-input flex-1 text-sm bg-gray-50/50" required>
+                        <button type="submit" class="btn-primary h-10 shadow-md bg-red-600 hover:bg-red-700 hover:border-red-600 border-red-600 focus:ring-red-500/30 px-6 sm:w-auto w-full">
                             <i class="ph ph-x-circle ph-bold w-4 h-4 mr-1"></i> Tolak
                         </button>
                     </div>
                 </form>
+
+                @unless($manualPayment)
+                    <div class="pt-4 border-t border-gray-100 border-dashed">
+                        <p class="text-sm text-amber-600">Record pembayaran manual tidak ditemukan. Sistem akan memproses langsung dari bukti pembayaran ini.</p>
+                    </div>
+                @endunless
             </div>
-            
+            @else
+            <!-- Status Final -->
+            <div class="card p-6 border-t-4 {{ $payment->isVerified() ? 'border-t-green-500' : 'border-t-red-500' }}">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 rounded-lg {{ $payment->isVerified() ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' }} flex items-center justify-center">
+                        <i class="ph {{ $payment->isVerified() ? 'ph-check-circle' : 'ph-x-circle' }} ph-bold w-4 h-4"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-900">Status Verifikasi</h2>
+                </div>
+
+                <div class="p-4 rounded-xl {{ $payment->isVerified() ? 'bg-green-50 border border-green-100' : 'bg-red-50 border border-red-100' }}">
+                    <p class="text-sm {{ $payment->isVerified() ? 'text-green-800' : 'text-red-800' }}">
+                        @if($payment->isVerified())
+                            <strong class="font-semibold">Bukti pembayaran telah diverifikasi.</strong><br>
+                            Pesanan telah diteruskan ke tahap pengemasan dan akan diproses.
+                        @else
+                            <strong class="font-semibold">Bukti pembayaran ditolak.</strong><br>
+                            Alasan: {{ $payment->admin_notes ?? 'Tidak ada alasan' }}
+                        @endif
+                    </p>
+                </div>
+
+                @if($payment->verified_at)
+                <div class="mt-4 text-sm text-gray-500">
+                    Diverifikasi oleh <span class="font-medium text-gray-700">{{ $payment->verifier->name ?? 'Admin' }}</span> pada {{ $payment->verified_at->format('d M Y, H:i') }} WIB
+                </div>
+                @endif
+            </div>
+            @endif
+
         </div>
     </div>
 
@@ -151,15 +200,15 @@
     <div x-show="showImageModal" x-cloak style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/90 p-4"
          x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-        
+
         <button @click="showImageModal = false" class="absolute top-4 right-4 text-white hover:text-gray-300 w-12 h-12 flex items-center justify-center bg-black/50 rounded-full hover:bg-black/70 transition-colors z-10">
             <i class="ph ph-x ph-bold w-6 h-6"></i>
         </button>
-        
+
         <div @click.away="showImageModal = false" class="relative max-w-4xl w-full flex items-center justify-center h-full"
              x-transition:enter="transition ease-out duration-300 delay-100" x-transition:enter-start="scale-95 opacity-0" x-transition:enter-end="scale-100 opacity-100">
-            @if($payment->order && $payment->order->latestPaymentProof && $payment->order->latestPaymentProof->image_url)
-                <img loading="lazy" src="{{ $payment->order->latestPaymentProof->image_url }}" class="max-w-full max-h-full object-contain rounded shadow-2xl">
+            @if($payment->image_path)
+                <img loading="lazy" src="{{ $payment->getImageUrl() }}" class="max-w-full max-h-full object-contain rounded shadow-2xl">
             @else
                 <div class="text-center text-white">
                     <i class="ph ph-image w-16 h-16 mx-auto mb-4"></i>

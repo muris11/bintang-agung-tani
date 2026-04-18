@@ -34,14 +34,14 @@
             <a href="/admin/produk" class="btn-secondary text-sm h-10 shadow-sm">
                 <i class="ph ph-arrow-left ph-bold w-4 h-4"></i> Kembali
             </a>
-            <button class="btn-primary text-sm h-10 shadow-md">
+            <button type="submit" form="create-product-form" class="btn-primary text-sm h-10 shadow-md">
                 <i class="ph ph-floppy-disk ph-bold w-4 h-4"></i> Simpan Produk
             </button>
         </div>
     </div>
 
     <!-- Main Content Grid -->
-    <form action="{{ route('admin.produk.store') }}" method="POST" class="grid grid-cols-1 xl:grid-cols-3 gap-6" enctype="multipart/form-data">
+    <form id="create-product-form" action="{{ route('admin.produk.store') }}" method="POST" class="grid grid-cols-1 xl:grid-cols-3 gap-6" enctype="multipart/form-data">
         @csrf
         
         <!-- Kolom Kiri: Informasi Utama & Harga -->
@@ -56,29 +56,36 @@
                 
                 <div class="space-y-5">
                     <div>
-                        <label for="nama_produk" class="form-label mb-1.5 block">Nama Produk <span class="text-red-500">*</span></label>
-                        <input type="text" id="nama_produk" class="form-input w-full" placeholder="Misal: Pupuk NPK Phonska 15-15-15" required>
+                        <label for="name" class="form-label mb-1.5 block">Nama Produk <span class="text-red-500">*</span></label>
+                        <input type="text" id="name" name="name" class="form-input w-full" value="{{ old('name') }}" placeholder="Misal: Pupuk NPK Phonska 15-15-15" required>
+                        @error('name')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
-                            <label for="kategori" class="form-label mb-1.5 block">Kategori <span class="text-red-500">*</span></label>
-                            <select id="kategori" class="form-input w-full bg-gray-50/50" required>
-                                <option value="" disabled selected>Pilih Kategori</option>
-                                <option value="pupuk">Pupuk</option>
-                                <option value="pestisida">Pestisida</option>
-                                <option value="benih">Benih & Bibit</option>
-                                <option value="alat">Alat Pertanian</option>
+                            <label for="category_id" class="form-label mb-1.5 block">Kategori <span class="text-red-500">*</span></label>
+                            <select id="category_id" name="category_id" class="form-input w-full bg-gray-50/50" required>
+                                <option value="" disabled {{ old('category_id') ? '' : 'selected' }}>Pilih Kategori</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
                             </select>
+                            @error('category_id')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div>
-                            <label for="merek" class="form-label mb-1.5 block">Merek / Brand <span class="text-gray-400 font-normal ml-1">(Opsional)</span></label>
-                            <input type="text" id="merek" class="form-input w-full" placeholder="Misal: Petrokimia Gresik">
+                            <label for="brand" class="form-label mb-1.5 block">Merek / Brand <span class="text-gray-400 font-normal ml-1">(Opsional)</span></label>
+                            <input type="text" id="brand" name="brand" class="form-input w-full" value="{{ old('brand') }}" placeholder="Misal: Petrokimia Gresik">
                         </div>
                     </div>
                     
                     <div>
-                        <label for="deskripsi" class="form-label mb-1.5 block">Deskripsi Produk <span class="text-red-500">*</span></label>
+                        <label for="description" class="form-label mb-1.5 block">Deskripsi Produk <span class="text-red-500">*</span></label>
                         <!-- Fake Rich Text Editor Toolbar -->
                         <div class="w-full mb-1 border border-gray-200 rounded-t-xl bg-gray-50 flex items-center p-2 gap-1 overflow-x-auto">
                             <button type="button" class="icon-button text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors"><i class="ph ph-text-b ph-bold w-4 h-4"></i></button>
@@ -88,7 +95,10 @@
                             <button type="button" class="icon-button text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors"><i class="ph ph-list-bullets w-4 h-4"></i></button>
                             <button type="button" class="icon-button text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors"><i class="ph ph-list-numbers w-4 h-4"></i></button>
                         </div>
-                        <textarea id="deskripsi" rows="6" class="form-input w-full rounded-t-none resize-y" placeholder="Tuliskan keterangan lengkap produk, manfaat, dan cara penggunaan..." required></textarea>
+                        <textarea id="description" name="description" rows="6" class="form-input w-full rounded-t-none resize-y" placeholder="Tuliskan keterangan lengkap produk, manfaat, dan cara penggunaan..." required>{{ old('description') }}</textarea>
+                        @error('description')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                         <p class="text-xs text-gray-500 mt-2">Pastikan deskripsi menarik dan menjelaskan detail spesifik produk.</p>
                     </div>
                 </div>
@@ -101,45 +111,81 @@
                     <h2 class="text-lg font-bold text-gray-900">Harga & Inventaris</h2>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                        <label for="harga" class="form-label mb-1.5 block">Harga Jual (Rp) <span class="text-red-500">*</span></label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    <div class="md:col-span-1">
+                        <label for="price_display" class="block text-sm font-medium text-gray-700 mb-2">
+                            Harga Jual (Rp) <span class="text-red-500">*</span>
+                        </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <span class="text-gray-500 font-medium">Rp</span>
+                                <span class="text-gray-500 font-semibold text-sm">Rp</span>
                             </div>
-                            <input type="number" id="harga" class="form-input w-full pl-12" placeholder="0" required>
+                            <input type="text" id="price_display"
+                                class="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 text-sm"
+                                value="{{ old('price') }}"
+                                placeholder="0"
+                                required>
+                            <input type="hidden" id="price" name="price" value="{{ old('price') }}">
                         </div>
+                        @error('price')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
-                    
-                    <div>
-                        <label for="stok" class="form-label mb-1.5 block">Stok Awal <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <input type="number" id="stok" class="form-input w-full" placeholder="0" required>
-                        </div>
+
+                    <div class="md:col-span-1">
+                        <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">
+                            Stok Awal <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" id="stock" name="stock"
+                            class="block w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 text-sm"
+                            style="-moz-appearance: textfield;"
+                            value="{{ old('stock') }}"
+                            min="0"
+                            required>
+                        @error('stock')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
-                    
-                    <div>
-                        <label for="berat" class="form-label mb-1.5 block">Berat/Volume (Pengiriman) <span class="text-red-500">*</span></label>
+
+                    <div class="md:col-span-1">
+                        <label for="weight" class="block text-sm font-medium text-gray-700 mb-2">
+                            Berat/Volume (Pengiriman) <span class="text-red-500">*</span>
+                        </label>
                         <div class="flex">
-                            <input type="number" id="berat" class="form-input rounded-r-none border-r-0 w-full" placeholder="0" required>
-                            <select class="form-input rounded-l-none bg-gray-50 w-28 shrink-0">
-                                <option value="kg">Kg</option>
-                                <option value="g">Gram</option>
-                                <option value="l">Liter</option>
-                                <option value="ml">Ml</option>
+                            <input type="number" id="weight" name="weight" step="0.01"
+                                class="flex-1 px-4 py-2.5 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 text-sm"
+                                style="-moz-appearance: textfield;"
+                                value="{{ old('weight') }}"
+                                min="0"
+                                required>
+                            <select name="weight_unit"
+                                class="px-3 py-2.5 border border-l-0 border-gray-300 rounded-r-lg bg-gray-50 text-gray-700 text-sm font-medium focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <option value="kg" {{ old('weight_unit', 'kg') == 'kg' ? 'selected' : '' }}>Kg</option>
+                                <option value="g" {{ old('weight_unit') == 'g' ? 'selected' : '' }}>Gram</option>
+                                <option value="l" {{ old('weight_unit') == 'l' ? 'selected' : '' }}>Liter</option>
+                                <option value="ml" {{ old('weight_unit') == 'ml' ? 'selected' : '' }}>Ml</option>
                             </select>
                         </div>
+                        @error('weight')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
-                    
-                    <div>
-                        <label for="satuan" class="form-label mb-1.5 block">Satuan Jual <span class="text-red-500">*</span></label>
-                        <select id="satuan" class="form-input w-full bg-gray-50/50" required>
-                            <option value="zak">Zak / Karung</option>
-                            <option value="botol">Botol</option>
-                            <option value="pcs">Pcs / Buah</option>
-                            <option value="paket">Paket</option>
+
+                    <div class="md:col-span-1">
+                        <label for="unit" class="block text-sm font-medium text-gray-700 mb-2">
+                            Satuan Jual <span class="text-red-500">*</span>
+                        </label>
+                        <select id="unit" name="unit"
+                            class="block w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900 text-sm"
+                            required>
+                            <option value="zak" {{ old('unit') == 'zak' ? 'selected' : '' }}>Zak / Karung</option>
+                            <option value="botol" {{ old('unit') == 'botol' ? 'selected' : '' }}>Botol</option>
+                            <option value="pcs" {{ old('unit') == 'pcs' ? 'selected' : '' }}>Pcs / Buah</option>
+                            <option value="paket" {{ old('unit') == 'paket' ? 'selected' : '' }}>Paket</option>
                         </select>
+                        @error('unit')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -156,16 +202,26 @@
                     <h2 class="text-lg font-bold text-gray-900">Media Produk</h2>
                 </div>
                 
-                <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center bg-gray-50 hover:bg-primary-50 hover:border-primary-300 group cursor-pointer transition-all">
+                <label for="product_images" class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center bg-gray-50 hover:bg-primary-50 hover:border-primary-300 group cursor-pointer transition-all block">
                     <div class="bg-white w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md group-hover:scale-110 transition-transform">
                         <i class="ph ph-upload-simple ph-bold w-6 h-6 text-primary-600"></i>
                     </div>
-                    <p class="text-sm font-bold text-gray-700 mb-1 group-hover:text-primary-700">Klik untuk unggah foto</p>
-                    <p class="text-xs text-gray-500">atau seret file ke sini</p>
+                    <p class="text-sm font-bold text-gray-700 mb-1 group-hover:text-primary-700">Klik untuk unggah maksimal 5 foto</p>
+                    <p class="text-xs text-gray-500">Pilih beberapa gambar sekaligus untuk galeri produk</p>
                     <div class="mt-4 flex items-center justify-center">
-                        <span class="text-[10px] font-medium tracking-wide text-gray-400 uppercase bg-gray-200/50 px-2 py-1 rounded">PNG, JPG, Max 5MB</span>
+                        <span class="text-[10px] font-medium tracking-wide text-gray-400 uppercase bg-gray-200/50 px-2 py-1 rounded">PNG, JPG, WEBP, Max 5 file × 5MB</span>
                     </div>
-                </div>
+                    <input type="file" id="product_images" name="product_images[]" accept="image/*" multiple class="hidden">
+                </label>
+
+                <div id="image-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 hidden"></div>
+                <p id="image-count-info" class="text-xs text-gray-500 mt-3 text-center">Belum ada gambar dipilih</p>
+                @error('product_images')
+                    <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                @enderror
+                @error('product_images.*')
+                    <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                @enderror
             </div>
             
             <!-- Status Produk -->
@@ -176,7 +232,8 @@
                 </div>
                 
                 <label class="inline-flex items-center cursor-pointer bg-gray-50 border border-gray-200 p-4 rounded-xl w-full">
-                    <input type="checkbox" value="" class="sr-only peer" checked>
+                    <input type="hidden" name="is_active" value="0">
+                    <input type="checkbox" name="is_active" value="1" class="sr-only peer" {{ old('is_active', '1') ? 'checked' : '' }}>
                     <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                     <div class="ms-4">
                         <span class="block text-sm font-bold text-gray-900">Aktifkan Produk</span>
@@ -188,5 +245,118 @@
         </div>
     </form>
 
+    <style>
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+
+    <script>
+        const priceDisplay = document.getElementById('price_display');
+        const priceHidden = document.getElementById('price');
+
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function unformatNumber(str) {
+            return str.replace(/\./g, '');
+        }
+
+        if (priceDisplay) {
+            let initialValue = priceDisplay.value;
+            if (initialValue) {
+                priceDisplay.value = formatNumber(unformatNumber(initialValue));
+            }
+
+            priceDisplay.addEventListener('input', function() {
+                let cursorPos = this.selectionStart;
+                let oldLength = this.value.length;
+                let value = this.value.replace(/[^\d]/g, '');
+
+                if (value) {
+                    this.value = formatNumber(value);
+                    priceHidden.value = value;
+                    let newLength = this.value.length;
+                    cursorPos += (newLength - oldLength);
+                    this.setSelectionRange(cursorPos, cursorPos);
+                } else {
+                    this.value = '';
+                    priceHidden.value = '';
+                }
+            });
+
+            priceDisplay.addEventListener('keydown', function(e) {
+                if ([8, 46, 9, 27, 13].includes(e.keyCode) ||
+                    (e.ctrlKey === true && [65, 67, 86, 88].includes(e.keyCode)) ||
+                    (e.keyCode >= 35 && e.keyCode <= 39)) {
+                    return;
+                }
+
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+
+            priceDisplay.addEventListener('blur', function() {
+                let value = this.value.replace(/[^\d]/g, '');
+                if (value) {
+                    this.value = formatNumber(value);
+                }
+            });
+        }
+
+        const imageInput = document.getElementById('product_images');
+        const previewGrid = document.getElementById('image-preview-grid');
+        const imageCountInfo = document.getElementById('image-count-info');
+
+        if (imageInput && previewGrid && imageCountInfo) {
+            imageInput.addEventListener('change', function() {
+                previewGrid.innerHTML = '';
+
+                const files = Array.from(this.files || []);
+
+                if (files.length === 0) {
+                    previewGrid.classList.add('hidden');
+                    imageCountInfo.textContent = 'Belum ada gambar dipilih';
+                    imageCountInfo.className = 'text-xs text-gray-500 mt-3 text-center';
+                    return;
+                }
+
+                if (files.length > 5) {
+                    alert('Maksimal 5 gambar. Silakan pilih ulang.');
+                    this.value = '';
+                    previewGrid.classList.add('hidden');
+                    imageCountInfo.textContent = 'Belum ada gambar dipilih';
+                    imageCountInfo.className = 'text-xs text-gray-500 mt-3 text-center';
+                    return;
+                }
+
+                files.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const item = document.createElement('div');
+                        item.className = 'relative aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-50';
+                        item.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview ${index + 1}" class="w-full h-full object-cover">
+                            <div class="absolute top-2 left-2 px-2 py-1 rounded bg-black/70 text-white text-[10px] font-bold">${index === 0 ? 'Utama' : index + 1}</div>
+                        `;
+                        previewGrid.appendChild(item);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                previewGrid.classList.remove('hidden');
+                imageCountInfo.textContent = `${files.length} gambar dipilih. Gambar pertama akan menjadi gambar utama.`;
+                imageCountInfo.className = 'text-xs text-primary-600 mt-3 text-center font-medium';
+            });
+        }
+    </script>
 </div>
 @endsection

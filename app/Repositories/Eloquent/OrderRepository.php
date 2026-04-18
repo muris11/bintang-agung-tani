@@ -107,7 +107,7 @@ final class OrderRepository implements OrderRepositoryInterface
         $endOfMonth = $now->copy()->endOfMonth();
 
         return [
-            'pending_payment_count' => $this->countByStatus(Order::STATUS_PAYMENT_PENDING, $user),
+            'pending_payment_count' => $this->countByStatus(Order::STATUS_PENDING, $user),
             'processing_count' => $this->countByStatus(Order::STATUS_PROCESSING, $user),
             'completed_count' => $this->countByStatus(Order::STATUS_COMPLETED, $user),
             'total_spent_this_month' => Order::where('user_id', $user->id)
@@ -115,7 +115,7 @@ final class OrderRepository implements OrderRepositoryInterface
                 ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
                 ->sum('total_amount'),
             'pending_payment_total' => Order::where('user_id', $user->id)
-                ->where('status', Order::STATUS_PAYMENT_PENDING)
+                ->where('status', Order::STATUS_PENDING)
                 ->sum('total_amount'),
             'total_orders' => Order::where('user_id', $user->id)->count(),
         ];

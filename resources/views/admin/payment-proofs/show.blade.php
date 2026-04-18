@@ -162,7 +162,7 @@
                                 <tbody class="divide-y divide-gray-100">
                                     @foreach($paymentProof->order->items as $item)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3">{{ $item->product->name ?? '-' }}</td>
+                                        <td class="px-4 py-3">{{ $item->product->name ?? ($item->product_name ?? '-') }}</td>
                                         <td class="px-4 py-3 text-center font-medium">{{ $item->quantity }}</td>
                                         <td class="px-4 py-3 text-right font-medium">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
                                     </tr>

@@ -47,10 +47,10 @@ class OrderTest extends TestCase
     {
         $this->actingAs($this->admin);
 
-        // Create order with payment_pending status so we can transition to processing
+        // Create order with menunggu_verifikasi status so we can transition to processing
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_MENUNGGU_VERIFIKASI,
         ]);
 
         OrderItem::factory()->create([
@@ -75,10 +75,10 @@ class OrderTest extends TestCase
     {
         $this->actingAs($this->admin);
 
-        // Create order with payment_pending status
+        // Create order with menunggu_verifikasi status
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_MENUNGGU_VERIFIKASI,
         ]);
 
         OrderItem::factory()->create([
@@ -86,7 +86,7 @@ class OrderTest extends TestCase
             'product_id' => $this->product->id,
         ]);
 
-        // Transition to processing (valid from payment_pending)
+        // Transition to processing (valid from menunggu_verifikasi)
         $this->patch(route('admin.orders.update-status', $order), [
             'status' => Order::STATUS_PROCESSING,
             'notes' => 'Pembayaran terverifikasi',
@@ -159,10 +159,10 @@ class OrderTest extends TestCase
     {
         $this->actingAs($this->admin);
 
-        // Create order with payment_pending status so we can transition to processing
+        // Create order with menunggu_verifikasi status so we can transition to processing
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_MENUNGGU_VERIFIKASI,
         ]);
 
         OrderItem::factory()->create([
@@ -184,7 +184,7 @@ class OrderTest extends TestCase
         $this->assertDatabaseHas('order_status_histories', [
             'order_id' => $order->id,
             'status' => Order::STATUS_PROCESSING,
-            'previous_status' => Order::STATUS_PAYMENT_PENDING,
+            'previous_status' => Order::STATUS_MENUNGGU_VERIFIKASI,
         ]);
     }
 
@@ -399,8 +399,8 @@ class OrderTest extends TestCase
         $this->actingAs($this->admin);
 
         // Create orders for bulk update
-        $order1 = Order::factory()->create(['user_id' => $this->user->id, 'status' => Order::STATUS_PAYMENT_PENDING]);
-        $order2 = Order::factory()->create(['user_id' => $this->user->id, 'status' => Order::STATUS_PAYMENT_PENDING]);
+        $order1 = Order::factory()->create(['user_id' => $this->user->id, 'status' => Order::STATUS_PENDING]);
+        $order2 = Order::factory()->create(['user_id' => $this->user->id, 'status' => Order::STATUS_PENDING]);
 
         foreach ([$order1, $order2] as $order) {
             OrderItem::factory()->create([
@@ -420,14 +420,14 @@ class OrderTest extends TestCase
     {
         $this->actingAs($this->admin);
 
-        // Create orders with payment_pending status
+        // Create orders with menunggu_verifikasi status
         $order1 = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_MENUNGGU_VERIFIKASI,
         ]);
         $order2 = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_MENUNGGU_VERIFIKASI,
         ]);
 
         foreach ([$order1, $order2] as $order) {
@@ -476,7 +476,7 @@ class OrderTest extends TestCase
 
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
         ]);
 
         OrderItem::factory()->create([

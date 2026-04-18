@@ -7,8 +7,12 @@
         }
     }
 
-    $authName = auth()->user()->name ?? 'User';
-    $authEmail = auth()->user()->email ?? '-';
+    $authUser = auth()->user();
+    $authName = $authUser->name ?? 'User';
+    $authEmail = $authUser->email ?? '-';
+    $authPhotoUrl =
+        $authUser?->profile_photo_url ??
+        'https://ui-avatars.com/api/?name=' . urlencode($authName) . '&background=ecfdf5&color=059669&size=32';
 @endphp
 
 <nav class="sticky top-0 z-40 bg-linear-to-r from-emerald-600 to-emerald-700 backdrop-blur-sm shadow-sm border-b border-emerald-800"
@@ -23,13 +27,13 @@
                 </a>
 
                 {{-- Desktop Navigation --}}
-                <div class="hidden md:flex items-center gap-6">
+                <div class="hidden md:flex items-center gap-1">
                     <a href="/user/produk"
-                        class="text-white/95 hover:text-white transition-colors {{ request()->is('user/produk') ? 'text-white font-semibold border-b-2 border-white pb-1' : '' }}">Produk</a>
+                        class="px-3 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 text-sm font-medium {{ request()->is('user/produk') ? 'bg-white/15 text-white' : '' }}">Produk</a>
                     <a href="/user/keranjang"
-                        class="text-white/95 hover:text-white transition-colors {{ request()->is('user/keranjang') ? 'text-white font-semibold border-b-2 border-white pb-1' : '' }}">Keranjang</a>
+                        class="px-3 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 text-sm font-medium {{ request()->is('user/keranjang') ? 'bg-white/15 text-white' : '' }}">Keranjang</a>
                     <a href="/user/riwayat"
-                        class="text-white/95 hover:text-white transition-colors {{ request()->is('user/riwayat') ? 'text-white font-semibold border-b-2 border-white pb-1' : '' }}">Pesanan</a>
+                        class="px-3 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 text-sm font-medium {{ request()->is('user/riwayat') ? 'bg-white/15 text-white' : '' }}">Pesanan</a>
                 </div>
             </div>
 
@@ -38,13 +42,13 @@
                 {{-- Search Bar (Desktop) --}}
                 <div class="hidden md:block relative">
                     <input type="text" placeholder="Cari produk..."
-                        class="search-bar-desktop bg-white! text-gray-800! placeholder-gray-500! border-white/80! focus:bg-white! focus:text-gray-900! focus:border-white!"
+                        class="search-bar-desktop bg-white/90! text-gray-900! placeholder-gray-500! border-white/80! focus:bg-white! focus:text-gray-900! focus:border-white! shadow-sm"
                         aria-label="Cari produk"
                         onkeyup="if(event.key==='Enter') window.location.href='/user/produk?search='+this.value">
                 </div>
 
                 {{-- Cart --}}
-                <button @click="$dispatch('toggle-cart')"
+                <a href="/user/keranjang"
                     class="relative icon-button text-white/85 hover:text-white hover:bg-white/10 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-700"
                     aria-label="Keranjang belanja">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,15 +59,15 @@
                     @if ($cartCount > 0)
                         <span class="cart-badge">{{ $cartCount > 99 ? '99+' : $cartCount }}</span>
                     @endif
-                </button>
+                </a>
 
                 {{-- User Menu --}}
                 <div class="relative" x-data="{ open: false }" @click.away="open = false">
                     <button @click="open = !open"
                         class="flex items-center gap-2 icon-button rounded-lg bg-white/15 hover:bg-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-700 focus:outline-none text-white"
                         aria-label="Menu pengguna">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($authName) }}&background=ecfdf5&color=059669&size=32"
-                            alt="{{ $authName }}" class="w-8 h-8 rounded-full object-cover ring-2 ring-emerald-300">
+                        <img src="{{ $authPhotoUrl }}" alt="{{ $authName }}"
+                            class="w-8 h-8 rounded-full object-cover ring-2 ring-emerald-300">
                         <span class="hidden md:inline text-sm font-medium text-white">{{ $authName }}</span>
                         <svg class="w-4 h-4 text-white/70 transition-transform" :class="{ 'rotate-180': open }"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">

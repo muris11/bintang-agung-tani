@@ -22,7 +22,7 @@ class DashboardExportController extends Controller
             ->count();
         $totalRevenue = Order::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
-            ->whereIn('status', ['completed', 'delivered'])
+            ->where('status', 'completed')
             ->sum('total_amount');
         
         // Get recent orders

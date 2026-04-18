@@ -239,8 +239,8 @@
                 </div>
 
                 <div>
-                    <label class="form-label block mb-1.5">Keterangan / Referensi Invois <span class="text-gray-400 font-normal ml-1">(Opsional)</span></label>
-                    <input type="text" name="reason" placeholder="Misal: Restock supplier" class="form-input w-full">
+                    <label class="form-label block mb-1.5">Keterangan / Referensi Invois <span class="text-red-500">*</span></label>
+                    <input type="text" name="reason" placeholder="Misal: Restock supplier" class="form-input w-full" required>
                 </div>
             </form>
             

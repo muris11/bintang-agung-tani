@@ -21,7 +21,7 @@ class DashboardController extends Controller
 
         // Get order statistics
         $pendingPaymentCount = Order::byUser($userId)
-            ->where('status', Order::STATUS_PAYMENT_PENDING)
+            ->where('status', Order::STATUS_PENDING)
             ->count();
 
         $processingCount = Order::byUser($userId)
@@ -37,7 +37,7 @@ class DashboardController extends Controller
 
         // Get pending payment total amount (for display in the card)
         $pendingPaymentTotal = Order::byUser($userId)
-            ->where('status', Order::STATUS_PAYMENT_PENDING)
+            ->where('status', Order::STATUS_PENDING)
             ->sum('total_amount');
 
         // Get recent orders (last 3)

@@ -137,8 +137,8 @@
                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
                     <div>
-                        <label class="block text-gray-700 font-medium mb-2">Kode Pos</label>
-                        <input type="text" name="postal_code" required
+                        <label class="block text-gray-700 font-medium mb-2">Provinsi</label>
+                        <input type="text" name="province" required placeholder="Contoh: Jawa Barat"
                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
                 </div>
@@ -205,10 +205,15 @@
                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
                     <div>
-                        <label class="block text-gray-700 font-medium mb-2">Kode Pos</label>
-                        <input type="text" name="postal_code" id="edit_postal_code" required
+                        <label class="block text-gray-700 font-medium mb-2">Provinsi</label>
+                        <input type="text" name="province" id="edit_province" required
                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Kode Pos</label>
+                    <input type="text" name="postal_code" id="edit_postal_code"
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="checkbox" name="is_default" id="edit_is_default" value="1"
@@ -237,7 +242,8 @@ function editAddress(address) {
     document.getElementById('edit_phone').value = address.phone;
     document.getElementById('edit_full_address').value = address.full_address;
     document.getElementById('edit_city').value = address.city;
-    document.getElementById('edit_postal_code').value = address.postal_code;
+    document.getElementById('edit_province').value = address.province ?? '';
+    document.getElementById('edit_postal_code').value = address.postal_code ?? '';
     document.getElementById('edit_is_default').checked = address.is_default;
     document.getElementById('editAddressModal').classList.remove('hidden');
 }

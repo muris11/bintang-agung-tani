@@ -45,16 +45,24 @@
         
         <!-- Left Column: Media Gallery -->
         <div class="lg:col-span-4 space-y-4 sticky top-24">
+            @php
+                $galleryImages = $product->getImages();
+                if (empty($galleryImages) && $product->getFirstImage()) {
+                    $galleryImages = [$product->getFirstImage()];
+                }
+                $mainImage = $galleryImages[0] ?? asset('images/no-product.jpg');
+            @endphp
+
             <!-- Main Image -->
             <div class="card p-2 bg-white flex items-center justify-center aspect-square overflow-hidden group">
-                <img loading="lazy" src="{{ $product->image_url ?? asset('images/no-product.jpg') }}" alt="{{ $product->name }}" class="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-110">
+                <img loading="lazy" id="admin-main-product-image" src="{{ $mainImage }}" alt="{{ $product->name }}" class="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-110">
             </div>
-            
+
             <!-- Thumbnails -->
-            @if($product->images && count($product->images) > 0)
+            @if(!empty($galleryImages))
             <div class="grid grid-cols-4 gap-3">
-                @foreach($product->images as $index => $image)
-                <button type="button" class="{{ $index === 0 ? 'border-2 border-primary-500' : 'border-2 border-transparent hover:border-primary-300' }} rounded-lg overflow-hidden cursor-pointer shadow-sm relative transition-colors">
+                @foreach($galleryImages as $index => $image)
+                <button type="button" onclick="document.getElementById('admin-main-product-image').src='{{ $image }}'" class="{{ $index === 0 ? 'border-2 border-primary-500' : 'border-2 border-transparent hover:border-primary-300' }} rounded-lg overflow-hidden cursor-pointer shadow-sm relative transition-colors">
                     <img loading="lazy" src="{{ $image }}" alt="Thumb {{ $index + 1 }}" class="w-full h-full object-cover aspect-square {{ $index !== 0 ? 'opacity-70 hover:opacity-100' : '' }}">
                 </button>
                 @endforeach

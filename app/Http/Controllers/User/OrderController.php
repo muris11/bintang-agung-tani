@@ -17,9 +17,25 @@ class OrderController extends Controller
 
     public function index(Request $request): View
     {
-        $orders = Order::where('user_id', auth()->id())
-            ->with(['items'])
-            ->orderBy('created_at', 'desc')
+        $userId = auth()->id();
+        $query = Order::where('user_id', $userId)
+            ->with(['items.product']);
+
+        $status = $request->query('status', 'semua');
+
+        if ($status && $status !== 'semua') {
+            $statusMapping = [
+                'menunggu-verifikasi' => Order::STATUS_MENUNGGU_VERIFIKASI,
+                'diproses' => Order::STATUS_PROCESSING,
+                'selesai' => Order::STATUS_COMPLETED,
+                'dibatalkan' => Order::STATUS_CANCELLED,
+            ];
+
+            $dbStatus = $statusMapping[$status] ?? $status;
+            $query->where('status', $dbStatus);
+        }
+
+        $orders = $query->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return view('user.riwayat', compact('orders'));
@@ -27,27 +43,18 @@ class OrderController extends Controller
 
     public function show(Order $order): View
     {
-        // Check authorization - user can only view their own orders
-        if ($order->user_id !== auth()->id()) {
-            abort(403, 'Anda tidak memiliki akses ke pesanan ini.');
-        }
+        // Use policy for authorization
+        $this->authorize('view', $order);
 
-        $order->load(['items', 'statusHistories']);
+        $order->load(['items.product', 'statusHistories', 'user', 'paymentMethod']);
 
         return view('user.detail-pesanan', compact('order'));
     }
 
     public function cancel(Order $order): RedirectResponse
     {
-        // Check authorization
-        if ($order->user_id !== auth()->id()) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk membatalkan pesanan ini.');
-        }
-
-        // Check if order can be cancelled
-        if (! $order->canBeCancelled()) {
-            return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan. Status saat ini: '.$order->getStatusLabel());
-        }
+        // Use policy for authorization
+        $this->authorize('cancel', $order);
 
         try {
             $this->orderService->cancelOrder(

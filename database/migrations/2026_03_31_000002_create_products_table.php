@@ -21,6 +21,7 @@ return new class extends Migration
             $table->decimal('price', 12, 2);
             $table->decimal('discount_price', 12, 2)->nullable();
             $table->integer('stock')->default(0);
+            $table->integer('min_stock')->default(10);
             $table->integer('min_order')->default(1);
             $table->integer('max_order')->nullable();
             $table->string('sku')->unique()->nullable();

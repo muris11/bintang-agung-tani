@@ -8,7 +8,10 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\StockService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class ProductController extends Controller
 {
@@ -28,7 +31,7 @@ class ProductController extends Controller
     /**
      * Display a listing of products.
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $query = Product::with('category');
 
@@ -72,7 +75,7 @@ class ProductController extends Controller
     /**
      * Show the form for creating a new product.
      */
-    public function create()
+    public function create(): View
     {
         $categories = Category::active()->ordered()->get();
 
@@ -82,9 +85,25 @@ class ProductController extends Controller
     /**
      * Store a newly created product.
      */
-    public function store(StoreProductRequest $request)
+    public function store(StoreProductRequest $request): RedirectResponse
     {
-        Product::create($request->validated());
+        $validated = $request->validated();
+
+        if ($request->hasFile('product_images')) {
+            $imagePaths = [];
+
+            foreach ($request->file('product_images') as $image) {
+                $path = $image->store('products', 'public');
+                $imagePaths[] = '/storage/'.$path;
+            }
+
+            if (! empty($imagePaths)) {
+                $validated['featured_image'] = $imagePaths[0];
+                $validated['images'] = $imagePaths;
+            }
+        }
+
+        Product::create($validated);
 
         return redirect('/admin/produk')
             ->with('success', 'Produk berhasil ditambahkan');
@@ -93,7 +112,7 @@ class ProductController extends Controller
     /**
      * Display the specified product.
      */
-    public function show(Product $product)
+    public function show(Product $product): View
     {
         $product->load(['category']);
 
@@ -106,7 +125,7 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified product.
      */
-    public function edit(Product $product)
+    public function edit(Product $product): View
     {
         $categories = Category::active()->ordered()->get();
 
@@ -116,9 +135,41 @@ class ProductController extends Controller
     /**
      * Update the specified product.
      */
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product): RedirectResponse
     {
-        $product->update($request->validated());
+        $validated = $request->validated();
+
+        if ($request->hasFile('product_images')) {
+            $existingImages = is_array($product->images) ? $product->images : [];
+            if ($product->featured_image && ! in_array($product->featured_image, $existingImages, true)) {
+                array_unshift($existingImages, $product->featured_image);
+            }
+
+            $newImagePaths = [];
+            foreach ($request->file('product_images') as $image) {
+                $path = $image->store('products', 'public');
+                $newImagePaths[] = '/storage/'.$path;
+            }
+
+            $mergedImages = array_values(array_slice(array_merge($existingImages, $newImagePaths), 0, 5));
+            $validated['images'] = $mergedImages;
+            $validated['featured_image'] = $mergedImages[0] ?? null;
+        } elseif ($request->hasFile('featured_image_file')) {
+            $request->validate([
+                'featured_image_file' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            ]);
+
+            if ($product->featured_image) {
+                $oldPath = ltrim(str_replace('/storage/', '', $product->featured_image), '/');
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $path = $request->file('featured_image_file')->store('products', 'public');
+            $validated['featured_image'] = '/storage/'.$path;
+            $validated['images'] = ['/storage/'.$path];
+        }
+
+        $product->update($validated);
 
         return redirect('/admin/produk')
             ->with('success', 'Produk berhasil diperbarui');
@@ -127,7 +178,7 @@ class ProductController extends Controller
     /**
      * Remove the specified product.
      */
-    public function destroy(Product $product)
+    public function destroy(Product $product): RedirectResponse
     {
         // Check if product has order items (using relationship if exists)
         $hasOrderItems = false;
@@ -152,8 +203,10 @@ class ProductController extends Controller
     /**
      * Toggle the active status of the product.
      */
-    public function toggleActive(Product $product)
+    public function toggleActive(Product $product): RedirectResponse
     {
+        $this->authorize('update', $product);
+
         $product->update([
             'is_active' => ! $product->is_active,
         ]);
@@ -167,8 +220,10 @@ class ProductController extends Controller
     /**
      * Toggle the featured status of the product.
      */
-    public function toggleFeatured(Product $product)
+    public function toggleFeatured(Product $product): RedirectResponse
     {
+        $this->authorize('update', $product);
+
         $product->update([
             'is_featured' => ! $product->is_featured,
         ]);
@@ -182,8 +237,10 @@ class ProductController extends Controller
     /**
      * Update the stock of the specified product.
      */
-    public function updateStock(Request $request, Product $product)
+    public function updateStock(Request $request, Product $product): RedirectResponse
     {
+        $this->authorize('update', $product);
+
         $validated = $request->validate([
             'stock' => 'required|integer|min:0',
             'reason' => 'required|string|max:255',
@@ -205,5 +262,51 @@ class ProductController extends Controller
 
         return back()
             ->with('success', 'Stok produk berhasil diperbarui');
+    }
+
+    /**
+     * Update product image.
+     */
+    public function updateImage(Request $request, Product $product): RedirectResponse
+    {
+        $this->authorize('update', $product);
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            // Delete old featured image if exists
+            if ($product->featured_image) {
+                $oldPath = str_replace('/storage', '', $product->featured_image);
+                Storage::delete($oldPath);
+            }
+
+            // Store new image
+            $path = $request->file('image')->store('products', 'public');
+            $product->update(['featured_image' => '/storage/'.$path]);
+
+            return back()->with('success', 'Gambar produk berhasil diperbarui');
+        }
+
+        return back()->with('error', 'Gagal mengupload gambar');
+    }
+
+    /**
+     * Delete product image.
+     */
+    public function deleteImage(Product $product): RedirectResponse
+    {
+        $this->authorize('update', $product);
+
+        if ($product->featured_image) {
+            $path = str_replace('/storage', '', $product->featured_image);
+            Storage::delete($path);
+            $product->update(['featured_image' => null]);
+
+            return back()->with('success', 'Gambar produk berhasil dihapus');
+        }
+
+        return back()->with('error', 'Tidak ada gambar untuk dihapus');
     }
 }

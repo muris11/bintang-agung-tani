@@ -128,6 +128,24 @@ class CartService
 
         $items = $cart->items->map(function ($item) {
             $product = $item->product;
+
+            if (! $product) {
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'name' => $item->product_name,
+                    'slug' => null,
+                    'image' => null,
+                    'unit_price' => (float) $item->unit_price,
+                    'original_price' => null,
+                    'quantity' => $item->quantity,
+                    'subtotal' => (float) $item->subtotal,
+                    'max_quantity' => 0,
+                    'notes' => $item->notes,
+                    'is_available' => false,
+                ];
+            }
+
             $maxQuantity = min($product->stock, $product->max_order ?? PHP_INT_MAX);
 
             return [

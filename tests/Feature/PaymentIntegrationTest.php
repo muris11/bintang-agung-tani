@@ -171,7 +171,7 @@ class PaymentIntegrationTest extends TestCase
 
         // Update order with payment method
         $order->payment_method_id = $paymentMethod->id;
-        $order->status = Order::STATUS_PAYMENT_PENDING;
+        $order->status = Order::STATUS_PENDING;
         $order->save();
 
         // Generate QR code data (simulating QR code generation)
@@ -363,8 +363,8 @@ class PaymentIntegrationTest extends TestCase
         $this->assertTrue($order->isPending());
         $this->assertFalse($order->isPaid());
 
-        // Status: payment_pending
-        $order->status = Order::STATUS_PAYMENT_PENDING;
+        // Status: pending
+        $order->status = Order::STATUS_PENDING;
         $order->save();
         $this->assertTrue($order->isPaymentPending());
 

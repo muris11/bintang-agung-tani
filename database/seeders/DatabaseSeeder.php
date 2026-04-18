@@ -243,10 +243,8 @@ class DatabaseSeeder extends Seeder
 
             $status = fake()->randomElement([
                 Order::STATUS_PENDING,
-                Order::STATUS_PAYMENT_PENDING,
+                Order::STATUS_MENUNGGU_VERIFIKASI,
                 Order::STATUS_PROCESSING,
-                Order::STATUS_SHIPPED,
-                Order::STATUS_DELIVERED,
                 Order::STATUS_COMPLETED,
                 Order::STATUS_CANCELLED,
             ]);
@@ -278,8 +276,9 @@ class DatabaseSeeder extends Seeder
             $totalAmount = $subtotal - $discountAmount + $shippingCost;
 
             $paidAmount = match ($status) {
-                Order::STATUS_COMPLETED, Order::STATUS_DELIVERED, Order::STATUS_SHIPPED, Order::STATUS_PROCESSING => $totalAmount,
-                Order::STATUS_PENDING, Order::STATUS_PAYMENT_PENDING => 0,
+                Order::STATUS_PROCESSING, Order::STATUS_COMPLETED => $totalAmount,
+                Order::STATUS_MENUNGGU_VERIFIKASI => $totalAmount,
+                Order::STATUS_PENDING => 0,
                 Order::STATUS_CANCELLED => fake()->boolean(50) ? $totalAmount : 0,
                 default => 0,
             };
@@ -296,9 +295,9 @@ class DatabaseSeeder extends Seeder
                 'shipping_cost' => $shippingCost,
                 'total_amount' => $totalAmount,
                 'paid_amount' => $paidAmount,
-                'shipping_courier' => in_array($status, [Order::STATUS_SHIPPED, Order::STATUS_DELIVERED, Order::STATUS_COMPLETED]) ? fake()->randomElement($couriers) : null,
+                'shipping_courier' => in_array($status, [Order::STATUS_PROCESSING, Order::STATUS_COMPLETED]) ? fake()->randomElement($couriers) : null,
                 'shipping_service' => fake()->optional(0.6)->randomElement(['REG', 'OKE', 'YES']),
-                'tracking_number' => in_array($status, [Order::STATUS_SHIPPED, Order::STATUS_DELIVERED, Order::STATUS_COMPLETED]) ? fake()->regexify('[A-Z]{2}[0-9]{9,12}') : null,
+                'tracking_number' => in_array($status, [Order::STATUS_PROCESSING, Order::STATUS_COMPLETED]) ? fake()->regexify('[A-Z]{2}[0-9]{9,12}') : null,
                 'shipping_address_snapshot' => $address?->getCompleteAddressAttribute() ?? fake()->address(),
                 'shipping_phone' => $address?->phone ?? fake()->phoneNumber(),
                 'payment_method' => fake()->randomElement(['Transfer Bank', 'COD', 'QRIS']),

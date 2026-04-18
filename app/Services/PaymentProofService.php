@@ -106,11 +106,32 @@ class PaymentProofService
         $proof->markAsVerified($admin->id, $notes);
 
         $order = $proof->order;
-        $order->markAsPaid($order->total_amount, $proof->paymentMethod->name, $admin->id);
-
-        // Update order status to processing after verification
         $previousStatus = $order->status;
-        $order->updateStatus(Order::STATUS_PROCESSING, 'Pembayaran terverifikasi oleh admin', $admin->id);
+
+        $payment = $order->payments()
+            ->where('provider', 'manual')
+            ->latest()
+            ->first();
+
+        if ($payment) {
+            $payment->status = \App\Models\Payment::STATUS_SUCCESS;
+            $payment->paid_at = now();
+            $payment->notes = ($payment->notes ? $payment->notes."\n" : '').($notes ?? 'Pembayaran diverifikasi oleh admin');
+            $payment->save();
+        }
+
+        $order->paid_amount = $order->total_amount;
+        $order->payment_method = $proof->paymentMethod->name;
+        $order->paid_at = now();
+        $order->status = Order::STATUS_PROCESSING;
+        $order->save();
+
+        $order->statusHistories()->create([
+            'status' => Order::STATUS_PROCESSING,
+            'previous_status' => $previousStatus,
+            'notes' => 'Pembayaran terverifikasi oleh admin',
+            'changed_by' => $admin->id,
+        ]);
 
         // Dispatch events for notifications
         event(new \App\Events\PaymentVerified($order, $admin->id, $notes));
@@ -128,6 +149,17 @@ class PaymentProofService
         }
 
         $proof->markAsRejected($admin->id, $reason);
+
+        $payment = $proof->order->payments()
+            ->where('provider', 'manual')
+            ->latest()
+            ->first();
+
+        if ($payment) {
+            $payment->status = \App\Models\Payment::STATUS_FAILED;
+            $payment->notes = ($payment->notes ? $payment->notes."\n" : '').'Ditolak: '.$reason;
+            $payment->save();
+        }
     }
 
     public function deleteProof(PaymentProof $proof): void

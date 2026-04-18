@@ -78,11 +78,11 @@
                             <div class="flex items-center gap-2">
                                 <span class="font-mono font-bold text-gray-900">{{ $payment->order->order_number ?? 'N/A' }}</span>
                                 @if($payment->isPending())
-                                    <span class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded bg-orange-100 text-orange-700">Pending</span>
-                                @elseif($payment->isSuccess())
-                                    <span class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded bg-green-100 text-green-700">Success</span>
+                                    <span class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded bg-yellow-100 text-yellow-700">Pending</span>
+                                @elseif($payment->isVerified())
+                                    <span class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded bg-green-100 text-green-700">Verified</span>
                                 @else
-                                    <span class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded bg-red-100 text-red-700">Failed</span>
+                                    <span class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded bg-red-100 text-red-700">Rejected</span>
                                 @endif
                             </div>
                         </td>
@@ -98,11 +98,11 @@
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="font-bold text-gray-900">{{ $payment->getFormattedAmount() }}</span>
+                            <span class="font-bold text-gray-900">{{ $payment->order->getFormattedTotal() }}</span>
                         </td>
                         <td class="px-6 py-4">
                             <span class="inline-flex px-2 py-1 rounded bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
-                                {{ strtoupper($payment->payment_method) }}
+                                {{ strtoupper($payment->paymentMethod->name ?? $payment->paymentMethod->code ?? '-') }}
                             </span>
                         </td>
                         <td class="px-6 py-4">
@@ -129,7 +129,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         @if($payments->hasPages())
         <div class="px-6 py-4 border-t border-gray-100">
             {{ $payments->links() }}

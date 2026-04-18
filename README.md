@@ -1,56 +1,56 @@
-`# Bintang Agung Tani - E-Commerce Agritech
+# Bintang Agung Tani - E-Commerce Agritech
 
 ![Logo](public/images/logo.png)
 
-A modern, responsive e-commerce platform for agricultural products built with **Laravel 12**, **Tailwind CSS v4**, **Alpine.js**, and **MySQL**. Designed for premium user experience with emerald green agricultural theme.
+Bintang Agung Tani adalah platform e-commerce agritech berbasis **Laravel 12** untuk penjualan produk pertanian dengan tampilan responsif, dashboard terpisah untuk user dan admin, alur checkout, pembayaran, invoice PDF, dan data demo yang sudah tersedia.
 
-## 🌟 Fitur Utama
+## Fitur Utama
 
-- **Premium UI/UX**: Clean, modern design with emerald green agricultural theme
-- **Fully Responsive**: Optimized for mobile, tablet, and desktop devices
-- **Dual Dashboard**: Separate interfaces for Customers (User) and Store Managers (Admin)
-- **Performance Optimized**: Code-splitting, lazy loading, and optimized bundle sizes
-- **Accessibility**: WCAG 2.1 AA compliant with proper ARIA labels and keyboard navigation
-- **Database Seeded**: Pre-populated with realistic data and user accounts
+- Dashboard user dan admin
+- Katalog produk, keranjang, checkout, dan riwayat pesanan
+- Manajemen alamat pengiriman
+- Upload bukti pembayaran dan verifikasi pembayaran
+- Generate invoice PDF untuk pesanan
+- Profil user dengan foto profil
+- Manajemen user, produk, kategori, dan stok dari dashboard admin
+- Data seed demo lengkap untuk pengujian dan demo
 
-## 🛠️ System Requirements
+## Tech Stack
 
-- **PHP**: ^8.2
-- **MySQL**: 8.0+ or MariaDB 10.5+
-- **Node.js**: 18+ (LTS recommended)
-- **Composer**: 2.5+
-- **Git**: Latest stable version
+- PHP 8.2+
+- Laravel 12
+- Tailwind CSS v4
+- Alpine.js
+- Vite
+- MySQL / MariaDB
+- DOMPDF untuk invoice PDF
+- Intervention Image untuk pemrosesan gambar
+- Endroid QR Code untuk QR/pembayaran
 
-## 🚀 Installation Guide
+## Kebutuhan Sistem
 
-### 1. Clone Repository
+- PHP 8.2 atau lebih baru
+- Composer 2.5+
+- Node.js 18+
+- MySQL 8.0+ atau MariaDB 10.5+
+
+## Instalasi
+
+### 1. Install dependensi
 
 ```bash
-git clone <repository-url>
-cd bintang-agung-tani
-```
-
-### 2. Install Dependencies
-
-```bash
-# Install PHP dependencies
 composer install
-
-# Install Node.js dependencies
 npm install
 ```
 
-### 3. Environment Configuration
+### 2. Siapkan environment
 
 ```bash
-# Copy environment file
-cp .env.example .env
-
-# Generate application key
+copy .env.example .env
 php artisan key:generate
 ```
 
-Edit `.env` file with your database credentials:
+Lalu sesuaikan database di file `.env`:
 
 ```env
 DB_CONNECTION=mysql
@@ -58,248 +58,188 @@ DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=bintang_agung_tani
 DB_USERNAME=root
-DB_PASSWORD=your_mysql_password
+DB_PASSWORD=
 ```
 
-### 4. Database Setup
+### 3. Jalankan migrasi dan seed
 
 ```bash
-# Create database (if using MySQL CLI)
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS bintang_agung_tani;"
-
-# Run migrations
 php artisan migrate
-
-# Seed database with demo data
 php artisan db:seed
 ```
 
-### 5. Start Development Servers
+Jika ingin reset total database beserta demo data:
 
-Open **two terminal windows** and run:
-
-**Terminal 1** (Vite dev server):
-```bash
-npm run dev
-```
-
-**Terminal 2** (Laravel dev server):
-```bash
-php artisan serve
-```
-
-### 6. Access Application
-
-Open your browser and navigate to: **http://localhost:8000**
-
-## 🔒 Login Credentials
-
-After running `php artisan db:seed`, use these accounts to test:
-
-### Admin Accounts
-| Email | Password | Role |
-|-------|----------|------|
-| `admin@gmail.com` | `password123` | Admin |
-| `admin@bintangagung.com` | `password123` | Admin |
-
-### User Accounts
-| Email | Password | Role |
-|-------|----------|------|
-| `user@gmail.com` | `password123` | User |
-| `budi.santoso@gmail.com` | `password123` | User |
-| `ani.wulandari@yahoo.com` | `password123` | User |
-| `dewi.kartika@outlook.co.id` | `password123` | User |
-| `agung.pratama@gmail.com` | `password123` | User |
-| `siti.aminah@hotmail.com` | `password123` | User |
-| `reza.firmansyah@gmail.com` | `password123` | User |
-
-## 🎨 Design System
-
-### Color Palette
-- **Primary**: Emerald green (`primary-*` Tailwind classes)
-- **Navbar/Sidebar**: `from-primary-800 via-primary-700 to-primary-800`
-- **Buttons**: `from-primary-600 to-primary-700`
-- **Links**: `text-primary-600 hover:text-primary-700`
-- **Backgrounds**: `from-gray-50 via-white to-primary-50/30`
-
-### Typography
-- **Primary Font**: Plus Jakarta Sans
-- **Secondary Font**: Space Grotesk
-- **Icons**: Phosphor Icons
-
-### Layout Breakpoints
-- **Mobile**: < 640px
-- **Tablet**: 640px - 1024px
-- **Desktop**: > 1024px
-
-## 📁 Project Structure
-
-```
-bintang-agung-tani/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── Admin/          # Admin controllers
-│   │   │   ├── AuthController.php
-│   │   │   └── ...
-│   │   └── Middleware/
-│   │       ├── AdminMiddleware.php
-│   │       └── UserMiddleware.php
-│   └── Models/                 # Eloquent models
-├── database/
-│   ├── migrations/             # Database migrations
-│   └── seeders/
-│       ├── DatabaseSeeder.php
-│       ├── AdminSeeder.php     # 2 admin accounts
-│       └── UserSeeder.php      # 7 user accounts
-├── resources/
-│   ├── css/
-│   │   └── app.css            # Tailwind CSS entry
-│   └── views/
-│       ├── auth/              # Login, register, forgot-password
-│       ├── components/        # Reusable Blade components
-│       ├── user/              # User dashboard pages
-│       └── admin/             # Admin dashboard pages
-├── routes/
-│   └── web.php                # Application routes
-└── public/
-    └── images/                # Static images and logo
-```
-
-## 🧪 Testing & Verification
-
-### Run Database Seeders
 ```bash
 php artisan migrate:fresh --seed
 ```
 
-### Build for Production
+### 4. Buat symbolic link storage
+
+Karena aplikasi menyimpan foto profil, invoice, dan file upload di storage publik:
+
+```bash
+php artisan storage:link
+```
+
+### 5. Jalankan aplikasi
+
+Opsi 1, dua terminal terpisah:
+
+```bash
+npm run dev
+php artisan serve
+```
+
+Opsi 2, jalankan semua sekaligus dengan script Composer:
+
+```bash
+composer run dev
+```
+
+## Kredensial Demo
+
+Setelah `php artisan db:seed`, gunakan akun berikut.
+
+### Admin
+
+| Email           | Password    |
+| --------------- | ----------- |
+| admin@gmail.com | password123 |
+
+### User
+
+| Email          | Password    |
+| -------------- | ----------- |
+| user@gmail.com | password123 |
+| budi@email.com | password123 |
+| siti@email.com | password123 |
+| dewi@email.com | password123 |
+| agus@email.com | password123 |
+| rini@email.com | password123 |
+
+## Data Demo
+
+Seeder utama membuat data demo berikut:
+
+- 1 akun admin
+- 6 akun user
+- 8 kategori produk
+- 40 produk demo
+- 20 pesanan sampel
+- alamat user, metode pembayaran, log stok, dan bukti pembayaran demo
+
+## Struktur Proyek
+
+```text
+app/
+  Actions/
+  DTOs/
+  Events/
+  Exceptions/
+  Http/
+    Controllers/
+    Requests/
+    Resources/
+  Jobs/
+  Listeners/
+  Models/
+  Notifications/
+  Policies/
+  Repositories/
+  Services/
+bootstrap/
+config/
+database/
+  factories/
+  migrations/
+  seeders/
+public/
+resources/
+  css/
+  js/
+  views/
+routes/
+tests/
+```
+
+## Fitur yang Tersedia Saat Ini
+
+### User
+
+- Login dan registrasi
+- Lihat produk dan detail produk
+- Keranjang belanja
+- Checkout dengan alamat pengiriman
+- Tambah, ubah, hapus alamat
+- Upload bukti pembayaran
+- Lihat status pesanan
+- Update profil, password, dan foto profil
+
+### Admin
+
+- Dashboard admin
+- Kelola user
+- Kelola produk dan kategori
+- Kelola pesanan
+- Verifikasi pembayaran
+- Melihat invoice dan data transaksi
+
+## Testing
+
+Jalankan seluruh test:
+
+```bash
+php artisan test
+```
+
+Test yang sering dipakai saat development:
+
+```bash
+php artisan test tests/Feature/User/ProfileTest.php
+php artisan test tests/Feature/User/CheckoutTest.php
+php artisan test tests/Feature/User/AddressTest.php
+php artisan test tests/Feature/Admin/UserTest.php
+```
+
+## Build Produksi
+
 ```bash
 npm run build
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 ```
 
-### Check Application Health
+## Troubleshooting
+
+### Aplikasi tidak bisa akses file upload atau invoice
+
+Pastikan storage link sudah dibuat:
+
 ```bash
-php artisan about
+php artisan storage:link
 ```
 
-## 🐛 Troubleshooting
+### Database kosong setelah install
 
-### Database Connection Issues
-**Problem**: `SQLSTATE[HY000] [2002] Connection refused`
+Jalankan seeder:
 
-**Solution**:
-1. Ensure MySQL service is running
-2. Check `.env` database credentials
-3. Verify database exists: `mysql -u root -p -e "SHOW DATABASES;"`
-
-### Permission Errors (Linux/Mac)
-**Problem**: `Permission denied` on storage or bootstrap/cache
-
-**Solution**:
 ```bash
-chmod -R 775 storage bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache  # Ubuntu/Debian
+php artisan db:seed
 ```
 
-### Vite Build Errors
-**Problem**: `Cannot find module` or build failures
+### Kredensial admin gagal
 
-**Solution**:
-```bash
-rm -rf node_modules
-npm install
-npm run build
-```
+Pastikan sudah menjalankan seeder dan gunakan:
 
-### Laravel Key Not Set
-**Problem**: `No application encryption key has been specified`
+- Email: admin@gmail.com
+- Password: password123
 
-**Solution**:
-```bash
-php artisan key:generate
-```
+## Lisensi
 
-## 📝 Command Reference
-
-### Artisan Commands
-```bash
-php artisan serve              # Start development server
-php artisan migrate            # Run database migrations
-php artisan migrate:fresh      # Reset and re-run migrations
-php artisan db:seed            # Run database seeders
-php artisan migrate:fresh --seed  # Reset + seed
-php artisan route:list         # List all routes
-php artisan optimize           # Cache config, routes, views
-php artisan cache:clear        # Clear application cache
-php artisan config:clear       # Clear config cache
-```
-
-### NPM Commands
-```bash
-npm run dev                    # Start Vite dev server
-npm run build                  # Build for production
-npm run preview                # Preview production build
-```
-
-### Git Commands
-```bash
-git status                     # Check repository status
-git add .                      # Stage all changes
-git commit -m "message"        # Commit changes
-git push origin main           # Push to remote
-```
-
-## 🔐 Security Features
-
-- **Bcrypt Password Hashing**: 12 rounds (configured in `.env`)
-- **Role-based Access Control**: Admin and User middleware
-- **CSRF Protection**: Enabled on all forms
-- **Session Security**: Database-driven sessions with encryption
-- **Input Validation**: Server-side validation on all inputs
-- **XSS Protection**: Blade's auto-escaping `{{ }}` syntax
-
-## 📱 Mobile Optimization
-
-- Touch targets: Minimum 44px
-- Responsive tables with horizontal scroll
-- Mobile-first navigation with slide-out sidebar
-- Optimized images with lazy loading
-- PWA-ready manifest structure
-
-## 🚀 Production Deployment
-
-### Checklist
-- [ ] Set `APP_ENV=production` in `.env`
-- [ ] Set `APP_DEBUG=false` in `.env`
-- [ ] Run `php artisan config:cache`
-- [ ] Run `php artisan route:cache`
-- [ ] Run `php artisan view:cache`
-- [ ] Run `npm run build`
-- [ ] Set proper file permissions
-- [ ] Configure web server (Nginx/Apache)
-- [ ] Enable HTTPS
-- [ ] Set up backup strategy
-
-### Performance Optimizations Implemented
-- Code splitting with manual chunks
-- Lazy loading for heavy libraries (ApexCharts)
-- Tree-shaking for unused code
-- Optimized bundle size (70% reduction)
-- CSS purging with Tailwind JIT
-
-## 📞 Support
-
-For issues, questions, or contributions:
-- Check the troubleshooting section above
-- Review Laravel documentation: https://laravel.com/docs/12.x
-- Review Tailwind CSS documentation: https://tailwindcss.com/docs
-
-## 📄 License
-
-This project is licensed under the MIT License.
+Proyek ini menggunakan lisensi MIT.
 
 ---
 
-**Bintang Agung Tani** - Modernizing Agricultural Commerce 🌱
-"# bintang-agung-tani" 
+Bintang Agung Tani - Modernizing Agricultural Commerce

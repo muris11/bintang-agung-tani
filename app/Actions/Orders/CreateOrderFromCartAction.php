@@ -50,7 +50,7 @@ final class CreateOrderFromCartAction
             // Create order
             $order = Order::create([
                 'user_id' => $userId,
-                'status' => Order::STATUS_PAYMENT_PENDING,
+                'status' => Order::STATUS_PENDING,
                 'order_number' => $this->generateOrderNumber(),
                 'subtotal' => $subtotal,
                 'shipping_cost' => $shippingCost,

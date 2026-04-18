@@ -8,13 +8,14 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     /**
      * Display admin dashboard with real data
      */
-    public function index()
+    public function index(): View
     {
         // Basic counts
         $totalProducts = Product::active()->count();
@@ -24,30 +25,27 @@ class DashboardController extends Controller
         $startOfMonth = now()->startOfMonth();
         $endOfMonth = now()->endOfMonth();
 
-        $ordersThisMonth = Order::whereBetween('created_at', [$startOfMonth, $endOfMonth])->count();
-        $totalRevenue = Order::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->whereNotIn('status', [Order::STATUS_CANCELLED, Order::STATUS_REFUNDED])
-            ->sum('total_amount');
+        // Single query for all order statistics this month (optimized)
+        $orderStats = Order::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->selectRaw("
+                COUNT(*) as total_orders,
+                SUM(CASE WHEN status != 'cancelled' THEN total_amount ELSE 0 END) as total_revenue,
+                SUM(CASE WHEN status IN ('pending', 'menunggu_verifikasi') THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
+                0 as completed_after_scan,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+            ")
+            ->first();
 
-        // Orders by status this month
-        $pendingOrders = Order::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->whereIn('status', [Order::STATUS_PENDING, Order::STATUS_PAYMENT_PENDING, Order::STATUS_MENUNGGU_VERIFIKASI])
-            ->count();
+        $ordersThisMonth = $orderStats->total_orders;
+        $totalRevenue = $orderStats->total_revenue;
+        $pendingOrders = $orderStats->pending;
+        $processingOrders = $orderStats->processing;
+        $completedAfterScanOrders = $orderStats->completed_after_scan;
+        $completedOrders = $orderStats->completed;
 
-        $processingOrders = Order::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->where('status', Order::STATUS_PROCESSING)
-            ->count();
-
-        $shippedOrders = Order::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->where('status', Order::STATUS_SHIPPED)
-            ->count();
-
-        $completedOrders = Order::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->where('status', Order::STATUS_COMPLETED)
-            ->count();
-
-        // Recent orders (last 4)
-        $recentOrders = Order::with(['user', 'items'])
+        // Recent orders (last 4) with eager loading for nested relationships
+        $recentOrders = Order::with(['user', 'items.product'])
             ->orderBy('created_at', 'desc')
             ->take(4)
             ->get();
@@ -77,7 +75,7 @@ class DashboardController extends Controller
             'totalRevenue',
             'pendingOrders',
             'processingOrders',
-            'shippedOrders',
+            'completedAfterScanOrders',
             'completedOrders',
             'recentOrders',
             'chartData',
@@ -143,7 +141,7 @@ class DashboardController extends Controller
 
             $monthRevenue = Order::whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
-                ->whereNotIn('status', [Order::STATUS_CANCELLED, Order::STATUS_REFUNDED])
+                ->where('status', '!=', Order::STATUS_CANCELLED)
                 ->sum('total_amount');
 
             // Convert to millions for chart display
@@ -164,7 +162,7 @@ class DashboardController extends Controller
         $categorySales = OrderItem::join('products', 'order_items.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->whereNotIn('orders.status', [Order::STATUS_CANCELLED, Order::STATUS_REFUNDED])
+            ->where('orders.status', '!=', Order::STATUS_CANCELLED)
             ->select('categories.name', DB::raw('SUM(order_items.quantity) as total_quantity'))
             ->groupBy('categories.name')
             ->orderBy('total_quantity', 'desc')

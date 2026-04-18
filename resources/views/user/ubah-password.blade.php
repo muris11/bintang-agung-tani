@@ -35,7 +35,7 @@
                         <i class="ph ph-user-circle ph-duotone w-5 h-5 text-gray-400"></i>
                         Profil Saya
                     </a>
-                    <a href="{{ route('user.profil.password') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-primary-700 bg-primary-50 rounded-xl transition-colors relative overflow-hidden">
+                    <a href="{{ route('user.profil.password.form') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-primary-700 bg-primary-50 rounded-xl transition-colors relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-500 rounded-r-full"></div>
                         <i class="ph ph-lock-key ph-duotone w-5 h-5 text-primary-500"></i>
                         Ubah Password

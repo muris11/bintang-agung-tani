@@ -47,7 +47,7 @@ class OrderCreated extends Notification implements ShouldQueue
             ->line('Pesanan Anda telah berhasil dibuat.')
             ->line("Nomor Pesanan: #{$orderNumber}")
             ->line("Total: Rp {$total}")
-            ->line('Status: Menunggu Pembayaran')
+            ->line('Status: Belum Bayar')
             ->action('Lihat Pesanan', route('user.orders.show', $this->order))
             ->action('Upload Bukti Pembayaran', route('user.payments.select-method', $this->order))
             ->line('Silakan lakukan pembayaran dan upload bukti pembayaran Anda.');

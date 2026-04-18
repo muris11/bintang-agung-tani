@@ -15,7 +15,7 @@
                 </ol>
             </nav>
             <h1 class="text-[28px] md:text-3xl font-bold text-gray-900 tracking-tight">Pesanan Pelanggan</h1>
-            <p class="text-sm text-gray-500 mt-1">Kelola pesanan masuk, verifikasi pembayaran, dan perbarui status pengiriman.</p>
+            <p class="text-sm text-gray-500 mt-1">Kelola pesanan masuk dan perbarui status utama pesanan secara konsisten.</p>
         </div>
         <div class="flex items-center gap-3">
             <button class="btn-secondary text-sm h-10 shadow-sm">
@@ -26,17 +26,6 @@
 
     <!-- Summary Metrics -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="card p-4 hover:-translate-y-1 transition-transform cursor-pointer border-b-4 border-b-blue-500 bg-blue-50/10">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Perlu Diproses</p>
-                    <h3 class="text-2xl font-black text-gray-900">{{ $stats['pending'] }}</h3>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                    <i class="ph ph-clock-countdown ph-duotone w-5 h-5"></i>
-                </div>
-            </div>
-        </div>
         <div class="card p-4 hover:-translate-y-1 transition-transform cursor-pointer border-b-4 border-b-orange-500 bg-orange-50/10">
             <div class="flex items-center justify-between">
                 <div>
@@ -51,11 +40,22 @@
         <div class="card p-4 hover:-translate-y-1 transition-transform cursor-pointer border-b-4 border-b-blue-500 bg-blue-50/10">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Dalam Pengiriman</p>
-                    <h3 class="text-2xl font-black text-gray-900">{{ $stats['shipped'] }}</h3>
+                    <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Diproses</p>
+                    <h3 class="text-2xl font-black text-gray-900">{{ $stats['processing'] }}</h3>
                 </div>
                 <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                    <i class="ph ph-truck ph-duotone w-5 h-5"></i>
+                    <i class="ph ph-gear-six ph-duotone w-5 h-5"></i>
+                </div>
+            </div>
+        </div>
+        <div class="card p-4 hover:-translate-y-1 transition-transform cursor-pointer border-b-4 border-b-red-500 bg-red-50/10">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Dibatalkan</p>
+                    <h3 class="text-2xl font-black text-gray-900">{{ $stats['cancelled'] }}</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
+                    <i class="ph ph-x-circle ph-duotone w-5 h-5"></i>
                 </div>
             </div>
         </div>
@@ -104,30 +104,30 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100 bg-white">
                     @forelse($orders as $index => $order)
-                    <tr class="hover:bg-gray-50/50 transition-colors {{ $order->status === 'payment_pending' ? 'bg-gray-50/30 text-gray-500' : '' }}">
+                    <tr class="hover:bg-gray-50/50 transition-colors">
                         <td class="px-4 py-4 text-gray-500 text-center text-sm font-medium">{{ $orders->firstItem() + $index }}</td>
                         <td class="px-4 py-4">
-                            <span class="font-bold {{ $order->status === 'payment_pending' ? 'text-gray-600 border-gray-600/20' : 'text-gray-900 border-gray-900/20 hover:border-primary-500 hover:text-primary-600' }} border-b pb-0.5 cursor-pointer transition-colors">
+                            <span class="font-bold text-gray-900 border-gray-900/20 hover:border-primary-500 hover:text-primary-600 border-b pb-0.5 cursor-pointer transition-colors">
                                 {{ $order->order_number }}
                             </span>
                         </td>
                         <td class="px-4 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full {{ $order->status === 'payment_pending' ? 'bg-gray-200 text-gray-500 opacity-70' : 'bg-gray-100 text-gray-600' }} flex items-center justify-center font-bold text-xs shrink-0">
+                                <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs shrink-0">
                                     {{ substr($order->user->name, 0, 1) }}
                                 </div>
                                 <div>
-                                    <p class="font-bold {{ $order->status === 'payment_pending' ? 'text-gray-600' : 'text-gray-900' }} text-sm leading-tight">{{ $order->user->name }}</p>
-                                    <p class="text-[11px] {{ $order->status === 'payment_pending' ? 'text-gray-400' : 'text-gray-500' }} mt-0.5">{{ $order->user->email }}</p>
+                                    <p class="font-bold text-gray-900 text-sm leading-tight">{{ $order->user->name }}</p>
+                                    <p class="text-[11px] text-gray-500 mt-0.5">{{ $order->user->email }}</p>
                                 </div>
                             </div>
                         </td>
                         <td class="px-4 py-4">
-                            <p class="text-sm font-medium {{ $order->status === 'payment_pending' ? 'text-gray-500' : 'text-gray-900' }}">{{ $order->created_at->format('d M Y') }}</p>
-                            <p class="text-[11px] {{ $order->status === 'payment_pending' ? 'text-gray-400' : 'text-gray-500' }} mt-0.5">{{ $order->created_at->format('H:i') }} WIB</p>
+                            <p class="text-sm font-medium text-gray-900">{{ $order->created_at->format('d M Y') }}</p>
+                            <p class="text-[11px] text-gray-500 mt-0.5">{{ $order->created_at->format('H:i') }} WIB</p>
                         </td>
                         <td class="px-4 py-4 text-right">
-                            <span class="font-bold {{ $order->status === 'payment_pending' ? 'text-gray-600' : 'text-gray-900' }}">Rp{{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                            <span class="font-bold text-gray-900">Rp{{ number_format($order->total_amount, 0, ',', '.') }}</span>
                         </td>
                         <td class="px-4 py-4 text-center">
                             <span class="inline-flex px-2.5 py-1 text-[11px] font-bold rounded-full {{ $order->getStatusBadgeClass() }} border">
@@ -142,15 +142,11 @@
                                 </a>
                                 
                                 <!-- Quick Actions Based on Status -->
-                                @if($order->status === 'payment_pending' || $order->status === 'menunggu_verifikasi')
+                                @if($order->status === 'menunggu_verifikasi')
                                     <a href="{{ route('admin.verifikasi.index') }}?order={{ $order->id }}" class="btn-primary h-8 px-2 text-xs border-orange-500 bg-orange-500 hover:bg-orange-600 hover:border-orange-600 shadow-sm focus:ring-orange-500/30 flex items-center gap-1 whitespace-nowrap">
                                         <i class="ph ph-receipt w-3.5 h-3.5"></i> Verifikasi
                                     </a>
                                 @elseif($order->status === 'processing')
-                                    <button onclick="openTrackingModal({{ $order->id }})" class="btn-primary h-8 px-2 text-xs border-blue-600 bg-blue-600 hover:bg-blue-700 hover:border-blue-700 shadow-sm focus:ring-blue-500/30 flex items-center gap-1 whitespace-nowrap">
-                                        <i class="ph ph-truck w-3.5 h-3.5"></i> Kirim
-                                    </button>
-                                @elseif($order->status === 'shipped')
                                     <form action="{{ route('admin.orders.update-status', $order) }}" method="POST" class="inline" onsubmit="return confirm('Tandai pesanan sebagai selesai?')">
                                         @csrf
                                         @method('PATCH')
@@ -185,7 +181,7 @@
                                         </a>
                                         
                                         <!-- Update Status -->
-                                        @if(in_array($order->status, ['pending', 'payment_pending', 'menunggu_verifikasi', 'processing', 'shipped']))
+                                        @if(in_array($order->status, ['menunggu_verifikasi', 'processing']))
                                             <button onclick="openStatusModal({{ $order->id }}, '{{ $order->status }}')" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left">
                                                 <i class="ph ph-arrows-clockwise w-4 h-4 text-blue-600"></i>
                                                 <span>Update Status</span>
@@ -258,39 +254,6 @@
 
 </div>
 
-<!-- Modal for Tracking Number -->
-<div id="trackingModal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/50" onclick="closeTrackingModal()"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700">
-                <h3 class="text-lg font-bold text-white">Tambah Nomor Resi</h3>
-                <p class="text-blue-100 text-sm">Masukkan informasi pengiriman untuk pesanan ini</p>
-            </div>
-            <form id="trackingForm" method="POST" class="p-6 space-y-4">
-                @csrf
-                <input type="hidden" name="order_id" id="trackingOrderId">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Kurir</label>
-                    <input type="text" name="courier" required class="form-input w-full h-11" placeholder="Contoh: JNE, J&T, SiCepat">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Resi</label>
-                    <input type="text" name="tracking_number" required class="form-input w-full h-11" placeholder="Nomor resi pengiriman">
-                </div>
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeTrackingModal()" class="flex-1 btn-secondary h-11">
-                        Batal
-                    </button>
-                    <button type="submit" class="flex-1 btn-primary h-11 bg-blue-600 hover:bg-blue-700">
-                        Simpan & Kirim
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <!-- Modal for Status Update -->
 <div id="statusModal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/50" onclick="closeStatusModal()"></div>
@@ -308,11 +271,10 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status Baru</label>
                     <select name="status" id="statusSelect" required class="form-input w-full h-11">
                         <option value="">Pilih Status</option>
-                        <option value="payment_pending">Menunggu Pembayaran</option>
                         <option value="menunggu_verifikasi">Menunggu Verifikasi</option>
                         <option value="processing">Diproses</option>
-                        <option value="shipped">Dikirim</option>
                         <option value="completed">Selesai</option>
+                        <option value="cancelled">Dibatalkan</option>
                     </select>
                 </div>
                 <div>

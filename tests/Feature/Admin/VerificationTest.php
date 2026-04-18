@@ -51,7 +51,7 @@ class VerificationTest extends TestCase
         // Create orders and payments
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
         ]);
 
         OrderItem::factory()->create([
@@ -80,7 +80,7 @@ class VerificationTest extends TestCase
         // Create order and payment
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
         ]);
 
         OrderItem::factory()->create([
@@ -121,7 +121,7 @@ class VerificationTest extends TestCase
         // Create order and payment
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
         ]);
 
         OrderItem::factory()->create([

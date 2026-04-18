@@ -41,7 +41,7 @@
     </div>
 
     <!-- Main Content Grid -->
-    <form id="edit-product-form" action="{{ route('admin.produk.update', $product) }}" method="POST" class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <form id="edit-product-form" action="{{ route('admin.produk.update', $product) }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         @csrf
         @method('PUT')
         
@@ -115,52 +115,90 @@
                     <h2 class="text-lg font-bold text-gray-900">Harga & Inventaris</h2>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                        <label for="price" class="form-label mb-1.5 block">Harga Jual (Rp) <span class="text-red-500">*</span></label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-4 font-bold text-gray-500">Rp</span>
-                            <input type="number" id="price" name="price" class="form-input w-full pl-10" value="{{ old('price', $product->price) }}" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    <!-- Harga -->
+                    <div class="md:col-span-1">
+                        <label for="price_display" class="block text-sm font-medium text-gray-700 mb-2">
+                            Harga Jual (Rp) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <span class="text-gray-500 font-semibold text-sm">Rp</span>
+                            </div>
+                            <input type="text" id="price_display"
+                                class="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 text-sm"
+                                value="{{ old('price', $product->price > 0 ? number_format($product->price, 0, ',', '.') : '') }}"
+                                placeholder="0"
+                                required>
+                            <input type="hidden" id="price" name="price" value="{{ old('price', $product->price) }}">
                         </div>
+
                         @error('price')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    
-                    <div>
-                        <label for="stock" class="form-label mb-1.5 block">Stok Tersedia <span class="text-red-500">*</span></label>
-                        <input type="number" id="stock" name="stock" class="form-input w-full" value="{{ old('stock', $product->stock) }}" required>
+
+                    <!-- Stok -->
+                    <div class="md:col-span-1">
+                        <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">
+                            Stok Tersedia <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" id="stock" name="stock"
+                            class="block w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 text-sm"
+                            style="-moz-appearance: textfield;"
+                            value="{{ old('stock', $product->stock) }}"
+                            min="0"
+                            required>
+
                         @error('stock')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    
-                    <div>
-                        <label for="weight" class="form-label mb-1.5 block">Berat/Volume (Pengiriman) <span class="text-red-500">*</span></label>
+
+                    <!-- Berat -->
+                    <div class="md:col-span-1">
+                        <label for="weight" class="block text-sm font-medium text-gray-700 mb-2">
+                            Berat/Volume (Pengiriman) <span class="text-red-500">*</span>
+                        </label>
                         <div class="flex">
-                            <input type="number" id="weight" name="weight" step="0.01" class="form-input rounded-r-none border-r-0 w-full" value="{{ old('weight', $product->weight) }}" required>
-                            <select name="weight_unit" class="form-input rounded-l-none bg-gray-50 w-28 shrink-0">
-                                <option value="kg" selected>Kg</option>
-                                <option value="g">Gram</option>
-                                <option value="l">Liter</option>
-                                <option value="ml">Ml</option>
+                            <input type="number" id="weight" name="weight" step="0.01"
+                                class="flex-1 px-4 py-2.5 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 text-sm"
+                                style="-moz-appearance: textfield;"
+                                value="{{ old('weight', $product->weight) }}"
+                                min="0"
+                                required>
+
+                            <select name="weight_unit"
+                                class="px-3 py-2.5 border border-l-0 border-gray-300 rounded-r-lg bg-gray-50 text-gray-700 text-sm font-medium focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <option value="kg" {{ old('weight_unit', 'kg') == 'kg' ? 'selected' : '' }}>Kg</option>
+                                <option value="g" {{ old('weight_unit') == 'g' ? 'selected' : '' }}>Gram</option>
+                                <option value="l" {{ old('weight_unit') == 'l' ? 'selected' : '' }}>Liter</option>
+                                <option value="ml" {{ old('weight_unit') == 'ml' ? 'selected' : '' }}>Ml</option>
                             </select>
                         </div>
+
                         @error('weight')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    
-                    <div>
-                        <label for="unit" class="form-label mb-1.5 block">Satuan Jual <span class="text-red-500">*</span></label>
-                        <select id="unit" name="unit" class="form-input w-full bg-gray-50/50" required>
+
+                    <!-- Satuan -->
+                    <div class="md:col-span-1">
+                        <label for="unit" class="block text-sm font-medium text-gray-700 mb-2">
+                            Satuan Jual <span class="text-red-500">*</span>
+                        </label>
+
+                        <select id="unit" name="unit"
+                            class="block w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900 text-sm"
+                            required>
                             <option value="zak" {{ old('unit', $product->unit) == 'zak' ? 'selected' : '' }}>Zak / Karung</option>
                             <option value="botol" {{ old('unit', $product->unit) == 'botol' ? 'selected' : '' }}>Botol</option>
                             <option value="pcs" {{ old('unit', $product->unit) == 'pcs' ? 'selected' : '' }}>Pcs / Buah</option>
                             <option value="paket" {{ old('unit', $product->unit) == 'paket' ? 'selected' : '' }}>Paket</option>
                         </select>
+
                         @error('unit')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -183,20 +221,46 @@
                     <div class="relative w-full aspect-square rounded-2xl bg-gray-50 border border-gray-200 overflow-hidden group">
                         @if($product->getFirstImage())
                             <img loading="lazy" src="{{ $product->getFirstImage() }}" alt="{{ $product->name }}" class="w-full h-full object-cover mix-blend-multiply transition-transform group-hover:scale-105">
+                            <button type="button" class="absolute top-2 right-2 bg-white text-red-600 p-2 rounded-lg shadow-sm hover:bg-red-50 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100" title="Hapus Gambar" onclick="submitDeleteImageForm()">
+                                <i class="ph ph-trash ph-bold w-4 h-4"></i>
+                            </button>
                         @else
                             <div class="w-full h-full flex items-center justify-center">
                                 <i class="ph ph-image ph-fill w-16 h-16 text-gray-300"></i>
                             </div>
                         @endif
-                        <button type="button" class="absolute top-2 right-2 bg-white text-red-600 p-2 rounded-lg shadow-sm hover:bg-red-50 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100" title="Hapus Gambar">
-                            <i class="ph ph-trash ph-bold w-4 h-4"></i>
-                        </button>
                     </div>
                 </div>
-                
-                <button type="button" class="btn-secondary w-full justify-center text-sm shadow-sm flex items-center gap-2">
-                    <i class="ph ph-upload-simple ph-bold w-4 h-4"></i> Ganti Gambar Utama
-                </button>
+
+                <!-- Upload Gambar -->
+                <div class="w-full space-y-3">
+                    <label for="product_images" class="btn-secondary w-full justify-center text-sm shadow-sm flex items-center gap-2 cursor-pointer">
+                        <i class="ph ph-upload-simple ph-bold w-4 h-4"></i> Tambah / Ganti Gambar Produk
+                    </label>
+                    <input type="file" id="product_images" name="product_images[]" accept="image/*" multiple class="hidden">
+                    <p id="selected-image-name" class="text-xs text-gray-500 text-center">Belum ada gambar baru dipilih</p>
+                    <p class="text-xs text-amber-600 text-center">Maksimal total 5 gambar. Gambar pertama menjadi gambar utama setelah disimpan.</p>
+
+                    @php
+                        $existingImages = $product->getImages();
+                        if (empty($existingImages) && $product->featured_image) {
+                            $existingImages = [$product->featured_image];
+                        }
+                    @endphp
+
+                    @if(!empty($existingImages))
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
+                            @foreach($existingImages as $index => $image)
+                                <div class="relative aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                                    <img src="{{ $image }}" alt="Gambar {{ $index + 1 }}" class="w-full h-full object-cover">
+                                    <div class="absolute top-2 left-2 px-2 py-1 rounded bg-black/70 text-white text-[10px] font-bold">{{ $index === 0 ? 'Utama' : $index + 1 }}</div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <div id="image-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3 hidden"></div>
+                </div>
             </div>
             
             <!-- Status Produk -->
@@ -217,18 +281,154 @@
 
                 <!-- Warning untuk Delete -->
                 <div class="mt-6 border-t border-red-500/20 pt-4 text-center">
-                    <form action="{{ route('admin.produk.destroy', $product) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini secara permanen?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-xs font-bold text-red-600 hover:text-red-700 hover:underline">
-                            Hapus Permanen Produk Ini
-                        </button>
-                    </form>
+                    <button type="button" onclick="submitDeleteProductForm()" class="text-xs font-bold text-red-600 hover:text-red-700 hover:underline">
+                        Hapus Permanen Produk Ini
+                    </button>
                 </div>
             </div>
             
         </div>
     </form>
 
-</div>
+    <form id="delete-image-form-{{ $product->id }}" action="{{ route('admin.produk.image.delete', $product) }}" method="POST" class="hidden">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    <form id="delete-product-form-{{ $product->id }}" action="{{ route('admin.produk.destroy', $product) }}" method="POST" class="hidden">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    <style>
+        /* Hilangkan spinner di Chrome/Safari/Edge */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Hilangkan spinner di Firefox */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+
+    <script>
+    // Format harga dengan pemisah ribuan
+    const priceDisplay = document.getElementById('price_display');
+    const priceHidden = document.getElementById('price');
+
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function unformatNumber(str) {
+        return str.replace(/\./g, '');
+    }
+
+    if (priceDisplay) {
+        let initialValue = priceDisplay.value;
+        if (initialValue) {
+            priceDisplay.value = formatNumber(unformatNumber(initialValue));
+        }
+
+        priceDisplay.addEventListener('input', function(e) {
+            let cursorPos = this.selectionStart;
+            let oldLength = this.value.length;
+            let value = this.value.replace(/[^\d]/g, '');
+
+            if (value) {
+                this.value = formatNumber(value);
+                priceHidden.value = value;
+                let newLength = this.value.length;
+                cursorPos += (newLength - oldLength);
+                this.setSelectionRange(cursorPos, cursorPos);
+            } else {
+                this.value = '';
+                priceHidden.value = '';
+            }
+        });
+
+        priceDisplay.addEventListener('keydown', function(e) {
+            if ([8, 46, 9, 27, 13].includes(e.keyCode) ||
+                (e.ctrlKey === true && [65, 67, 86, 88].includes(e.keyCode)) ||
+                (e.keyCode >= 35 && e.keyCode <= 39)) {
+                return;
+            }
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
+        });
+
+        priceDisplay.addEventListener('blur', function() {
+            let value = this.value.replace(/[^\d]/g, '');
+            if (value) {
+                this.value = formatNumber(value);
+            }
+        });
+    }
+
+    const productImagesInput = document.getElementById('product_images');
+    const selectedImageName = document.getElementById('selected-image-name');
+    const previewGrid = document.getElementById('image-preview-grid');
+
+    if (productImagesInput && selectedImageName && previewGrid) {
+        productImagesInput.addEventListener('change', function() {
+            previewGrid.innerHTML = '';
+            const files = Array.from(this.files || []);
+
+            if (files.length === 0) {
+                selectedImageName.textContent = 'Belum ada gambar baru dipilih';
+                selectedImageName.className = 'text-xs text-gray-500 text-center';
+                previewGrid.classList.add('hidden');
+                return;
+            }
+
+            if (files.length > 5) {
+                alert('Maksimal pilih 5 gambar.');
+                this.value = '';
+                selectedImageName.textContent = 'Belum ada gambar baru dipilih';
+                selectedImageName.className = 'text-xs text-gray-500 text-center';
+                previewGrid.classList.add('hidden');
+                return;
+            }
+
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const item = document.createElement('div');
+                    item.className = 'relative aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-50';
+                    item.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${index + 1}" class="w-full h-full object-cover">
+                        <div class="absolute top-2 left-2 px-2 py-1 rounded bg-black/70 text-white text-[10px] font-bold">Baru ${index + 1}</div>
+                    `;
+                    previewGrid.appendChild(item);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            selectedImageName.textContent = `${files.length} gambar baru dipilih`;
+            selectedImageName.className = 'text-xs text-green-600 text-center font-medium';
+            previewGrid.classList.remove('hidden');
+        });
+    }
+
+    function submitDeleteImageForm() {
+        if (confirm('Apakah Anda yakin ingin menghapus gambar produk ini?')) {
+            const deleteForm = document.getElementById('delete-image-form-{{ $product->id }}');
+            if (deleteForm) {
+                deleteForm.submit();
+            }
+        }
+    }
+
+    function submitDeleteProductForm() {
+        if (confirm('Apakah Anda yakin ingin menghapus produk ini secara permanen?')) {
+            const deleteForm = document.getElementById('delete-product-form-{{ $product->id }}');
+            if (deleteForm) {
+                deleteForm.submit();
+            }
+        }
+    }
+    </script>
 @endsection

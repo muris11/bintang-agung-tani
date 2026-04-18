@@ -79,7 +79,7 @@ class DashboardTest extends TestCase
 
         // Create orders with different statuses
         $pendingOrder = $this->createOrder($user, [
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
         ]);
         $completedOrder = $this->createOrder($user, [
             'status' => Order::STATUS_COMPLETED,
@@ -168,11 +168,11 @@ class DashboardTest extends TestCase
 
         // Create pending payment orders
         $order1 = $this->createOrder($user, [
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
             'total_amount' => 50000,
         ]);
         $order2 = $this->createOrder($user, [
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
             'total_amount' => 75000,
         ]);
 
@@ -327,11 +327,11 @@ class DashboardTest extends TestCase
 
         // Create orders for both users
         $userOrder = $this->createOrder($user, [
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
             'total_amount' => 50000,
         ]);
         $otherUserOrder = $this->createOrder($otherUser, [
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
             'total_amount' => 100000,
         ]);
 

@@ -35,11 +35,8 @@ class OrderTest extends TestCase
         // Verify STATUS_COLORS uses standard Tailwind palette
         $expectedColors = [
             Order::STATUS_PENDING => 'yellow',
-            Order::STATUS_PAYMENT_PENDING => 'orange',
             Order::STATUS_MENUNGGU_VERIFIKASI => 'orange',
             Order::STATUS_PROCESSING => 'blue',
-            Order::STATUS_SHIPPED => 'indigo',
-            Order::STATUS_DELIVERED => 'purple',
             Order::STATUS_COMPLETED => 'green',
             Order::STATUS_CANCELLED => 'red',
         ];
@@ -67,17 +64,13 @@ class OrderTest extends TestCase
     #[Test]
     public function test_all_statuses_have_defined_colors(): void
     {
-        // Ensure every status constant has a corresponding color
+        // Ensure every active status has a corresponding color
         $allStatuses = [
             Order::STATUS_PENDING,
-            Order::STATUS_PAYMENT_PENDING,
             Order::STATUS_MENUNGGU_VERIFIKASI,
             Order::STATUS_PROCESSING,
-            Order::STATUS_SHIPPED,
-            Order::STATUS_DELIVERED,
             Order::STATUS_COMPLETED,
             Order::STATUS_CANCELLED,
-            Order::STATUS_REFUNDED,
         ];
 
         foreach ($allStatuses as $status) {
@@ -87,6 +80,32 @@ class OrderTest extends TestCase
                 "Status '{$status}' should have a defined color in STATUS_COLORS"
             );
         }
+    }
+
+    #[Test]
+    public function test_active_status_labels_only_use_five_supported_statuses(): void
+    {
+        $this->assertSame([
+            Order::STATUS_PENDING,
+            Order::STATUS_MENUNGGU_VERIFIKASI,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_COMPLETED,
+            Order::STATUS_CANCELLED,
+        ], array_keys(Order::STATUS_LABELS));
+
+        $this->assertSame('Belum Bayar', Order::STATUS_LABELS[Order::STATUS_PENDING]);
+    }
+
+    #[Test]
+    public function test_active_status_colors_only_use_five_supported_statuses(): void
+    {
+        $this->assertSame([
+            Order::STATUS_PENDING,
+            Order::STATUS_MENUNGGU_VERIFIKASI,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_COMPLETED,
+            Order::STATUS_CANCELLED,
+        ], array_keys(Order::STATUS_COLORS));
     }
 
     #[Test]

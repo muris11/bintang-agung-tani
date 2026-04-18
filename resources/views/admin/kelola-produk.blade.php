@@ -39,7 +39,7 @@
                    class="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-sm">
         </div>
         
-        <a href="/admin/tambah-produk" class="btn-primary w-full sm:w-auto text-sm justify-center shadow-md">
+        <a href="{{ route('admin.produk.create') }}" class="btn-primary w-full sm:w-auto text-sm justify-center shadow-md">
             <i class="ph ph-plus ph-bold w-4 h-4"></i> Tambah Produk
         </a>
     </div>

@@ -51,10 +51,10 @@ class QRScanController extends Controller
         }
 
         // Check if order can be marked as completed
-        if ($order->status !== Order::STATUS_PROCESSING && $order->status !== Order::STATUS_SHIPPED) {
+        if ($order->status !== Order::STATUS_PROCESSING) {
             return redirect()
                 ->back()
-                ->with('error', "Pesanan tidak dapat diselesaikan. Status saat ini: {$order->getStatusLabel()}. Hanya pesanan yang sedang diproses atau dikirim yang dapat diselesaikan.");
+                ->with('error', "Pesanan tidak dapat diselesaikan. Status saat ini: {$order->getStatusLabel()}. Hanya pesanan yang sedang diproses yang dapat diselesaikan.");
         }
 
         // Mark order as completed

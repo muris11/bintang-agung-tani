@@ -62,6 +62,9 @@ class UpdateProductRequest extends FormRequest
             'images' => 'nullable|array',
             'images.*' => 'url',
             'featured_image' => 'nullable|url',
+            'featured_image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'product_images' => 'nullable|array|max:5',
+            'product_images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'is_featured' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
         ];

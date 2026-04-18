@@ -129,36 +129,36 @@ class OrderTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        // Create an order via factory with payment_pending status
+        // Create an order via factory with pending status
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
         ]);
         OrderItem::factory()->create([
             'order_id' => $order->id,
             'product_id' => $this->product->id,
         ]);
 
-        // Add status history for payment_pending
+        // Add status history for pending
         $this->assertDatabaseHas('order_status_histories', [
             'order_id' => $order->id,
-            'status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_PENDING,
         ]);
 
-        // Create admin and update order status from payment_pending to processing
+        // Create admin and update order status from pending to menunggu_verifikasi
         $admin = User::factory()->create(['is_admin' => true]);
         $this->actingAs($admin);
 
         $orderService = app(\App\Services\OrderService::class);
-        $orderService->updateStatus($order, Order::STATUS_PROCESSING, 'Pesanan diproses', $admin->id);
+        $orderService->updateStatus($order, Order::STATUS_MENUNGGU_VERIFIKASI, 'Menunggu verifikasi pembayaran', $admin->id);
 
         $order->refresh();
-        $this->assertEquals(Order::STATUS_PROCESSING, $order->status);
+        $this->assertEquals(Order::STATUS_MENUNGGU_VERIFIKASI, $order->status);
 
         $this->assertDatabaseHas('order_status_histories', [
             'order_id' => $order->id,
-            'status' => Order::STATUS_PROCESSING,
-            'previous_status' => Order::STATUS_PAYMENT_PENDING,
+            'status' => Order::STATUS_MENUNGGU_VERIFIKASI,
+            'previous_status' => Order::STATUS_PENDING,
         ]);
     }
 

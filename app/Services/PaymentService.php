@@ -34,7 +34,7 @@ class PaymentService
             'expired_at' => now()->addHours(24),
         ]);
 
-        $order->status = 'payment_pending';
+        $order->status = Order::STATUS_PENDING;
         $order->save();
 
         return $payment;

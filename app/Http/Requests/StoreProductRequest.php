@@ -49,6 +49,8 @@ class StoreProductRequest extends FormRequest
             'sku' => 'nullable|string|max:50|unique:products',
             'unit' => 'nullable|string|max:20',
             'weight' => 'nullable|numeric|min:0',
+            'product_images' => 'nullable|array|max:5',
+            'product_images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'images' => 'nullable|array',
             'images.*' => 'url',
             'featured_image' => 'nullable|url',

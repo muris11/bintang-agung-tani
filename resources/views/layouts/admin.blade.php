@@ -46,6 +46,8 @@ use App\Models\Setting;
             </main>
         </div>
     </div>
+    
+    @yield('scripts')
 </body>
 </html>
 

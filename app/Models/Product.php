@@ -21,6 +21,7 @@ class Product extends Model
         'price',
         'discount_price',
         'stock',
+        'min_stock',
         'min_order',
         'max_order',
         'sku',
@@ -38,6 +39,7 @@ class Product extends Model
         'discount_price' => 'decimal:2',
         'weight' => 'decimal:2',
         'stock' => 'integer',
+        'min_stock' => 'integer',
         'min_order' => 'integer',
         'max_order' => 'integer',
         'view_count' => 'integer',
@@ -78,9 +80,14 @@ class Product extends Model
         });
     }
 
-    public function category()
+    public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function orderItems(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(OrderItem::class);
     }
 
     public function getCurrentPrice(): float
@@ -249,7 +256,7 @@ class Product extends Model
         return true;
     }
 
-    public function stockLogs()
+    public function stockLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(StockLog::class);
     }

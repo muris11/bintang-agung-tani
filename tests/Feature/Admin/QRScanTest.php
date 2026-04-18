@@ -93,11 +93,11 @@ class QRScanTest extends TestCase
         $this->assertEquals(Order::STATUS_MENUNGGU_VERIFIKASI, $order->status);
     }
 
-    public function test_admin_can_scan_qr_for_shipped_order(): void
+    public function test_admin_cannot_complete_order_not_in_processing_status_after_qr_scan(): void
     {
         $admin = $this->createAdminUser();
         $order = Order::factory()->create([
-            'status' => Order::STATUS_SHIPPED,
+            'status' => Order::STATUS_COMPLETED,
         ]);
         $qrData = $order->generateQrCodeData();
 
@@ -105,8 +105,8 @@ class QRScanTest extends TestCase
             'qr_data' => $qrData,
         ]);
 
-        $response->assertRedirect(route('admin.orders.show', $order));
-        $response->assertSessionHas('success');
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
 
         $order->refresh();
         $this->assertEquals(Order::STATUS_COMPLETED, $order->status);

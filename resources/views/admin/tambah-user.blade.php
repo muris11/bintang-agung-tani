@@ -76,8 +76,8 @@
                 </div>
 
                 <div>
-                    <label for="address" class="form-label mb-1.5 block">Alamat Lengkap <span class="text-gray-400 font-normal ml-1">(Opsional)</span></label>
-                    <textarea id="address" name="address" rows="3" class="form-input w-full resize-y" placeholder="Masukkan alamat lengkap">{{ old('address') }}</textarea>
+                    <label for="address" class="form-label mb-1.5 block">Alamat Ringkas Profil <span class="text-gray-400 font-normal ml-1">(Opsional)</span></label>
+                    <textarea id="address" name="address" rows="3" class="form-input w-full resize-y" placeholder="Opsional. Alamat utama user sebaiknya dikelola dari menu alamat user.">{{ old('address') }}</textarea>
                 </div>
 
                 <div class="border-t border-gray-100 pt-5">

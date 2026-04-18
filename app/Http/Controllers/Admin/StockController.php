@@ -83,24 +83,49 @@ class StockController extends Controller
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'stock' => 'required|integer|min:0',
             'reason' => 'required|string|max:255',
+            'stock' => 'nullable|integer|min:0',
+            'quantity' => 'nullable|integer|min:0',
+            'adjustment_type' => 'nullable|string|in:add,subtract,set',
         ]);
 
-        $newStock = $validated['stock'];
-        $currentStock = $product->stock;
-        $difference = $newStock - $currentStock;
+        if (isset($validated['stock']) && $validated['stock'] !== null) {
+            $newStock = (int) $validated['stock'];
+            $currentStock = $product->stock;
+            $difference = $newStock - $currentStock;
 
-        if ($difference > 0) {
-            // Stock increase
-            $product->increaseStock($difference, $validated['reason']);
-        } elseif ($difference < 0) {
-            // Stock decrease
-            $decreaseAmount = abs($difference);
-            $product->decreaseStock($decreaseAmount, $validated['reason']);
+            if ($difference > 0) {
+                $product->increaseStock($difference, $validated['reason']);
+            } elseif ($difference < 0) {
+                $product->decreaseStock(abs($difference), $validated['reason']);
+            }
+
+            return redirect()->back()->with('success', 'Stok berhasil diperbarui.');
         }
 
-        return redirect()->back()->with('success', 'Stock updated successfully');
+        $quantity = (int) ($validated['quantity'] ?? 0);
+        $adjustmentType = $validated['adjustment_type'] ?? 'add';
+
+        if ($adjustmentType === 'set') {
+            $currentStock = $product->stock;
+            $difference = $quantity - $currentStock;
+
+            if ($difference > 0) {
+                $product->increaseStock($difference, $validated['reason']);
+            } elseif ($difference < 0) {
+                $product->decreaseStock(abs($difference), $validated['reason']);
+            }
+        } elseif ($adjustmentType === 'subtract') {
+            if ($quantity > 0) {
+                $product->decreaseStock($quantity, $validated['reason']);
+            }
+        } else {
+            if ($quantity > 0) {
+                $product->increaseStock($quantity, $validated['reason']);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Stok berhasil diperbarui.');
     }
 
     /**

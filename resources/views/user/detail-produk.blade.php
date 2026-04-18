@@ -69,14 +69,14 @@
                 <!-- Gallery -->
                 <div class="space-y-4">
                     <!-- Main Image -->
-                    <div class="w-full bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center p-6 h-80 sm:h-[400px]">
+                    <div class="w-full bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center p-4 sm:p-6 min-h-[320px] sm:min-h-[400px]">
                         @php
                             $images = $product->getImages() ?? [];
                             $firstImage = $images[0] ?? $product->getFirstImage();
                             $altText = $product->name . ($product->category ? ' - ' . $product->category->name : '');
                         @endphp
                         @if($firstImage)
-                            <img loading="lazy" src="{{ $firstImage }}" alt="{{ $altText }}" class="w-full h-full object-cover rounded-xl" id="main-product-image">
+                            <img loading="lazy" src="{{ $firstImage }}" alt="{{ $altText }}" class="max-w-full max-h-[280px] sm:max-h-[360px] w-auto h-auto object-contain rounded-xl" id="main-product-image">
                         @else
                             <div class="w-full h-full flex items-center justify-center">
                                 <i class="ph ph-image ph-fill w-24 h-24 text-gray-300"></i>
@@ -88,12 +88,12 @@
                     <div class="flex items-center gap-3 overflow-x-auto pb-2">
                         @forelse($images as $index => $image)
                             <button class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-lg border-2 {{ $index === 0 ? 'border-primary-500' : 'border-gray-200 hover:border-primary-500' }} bg-gray-50 p-2 flex items-center justify-center focus:outline-none transition-colors" onclick="document.getElementById('main-product-image').src='{{ $image }}'">
-                                <img loading="lazy" src="{{ $image }}" alt="{{ $product->name }} - {{ $index + 1 }}" class="w-full h-full object-cover rounded-lg">
+                                <img loading="lazy" src="{{ $image }}" alt="{{ $product->name }} - {{ $index + 1 }}" class="max-w-full max-h-full w-auto h-auto object-contain rounded-lg">
                             </button>
                         @empty
                             @if($product->getFirstImage())
                                 <button class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-lg border-2 border-primary-500 bg-gray-50 p-2 flex items-center justify-center focus:outline-none">
-                                    <img loading="lazy" src="{{ $product->getFirstImage() }}" alt="{{ $product->name }}" class="w-full h-full object-cover rounded-lg">
+                                    <img loading="lazy" src="{{ $product->getFirstImage() }}" alt="{{ $product->name }}" class="max-w-full max-h-full w-auto h-auto object-contain rounded-lg">
                                 </button>
                             @endif
                         @endforelse

@@ -115,10 +115,6 @@ use App\Models\Setting;
                                 <span class="text-sm text-gray-500">Tanggal Transaksi:</span>
                                 <span class="text-sm font-bold text-gray-900">{{ $order->created_at->format('d M Y') }}</span>
                             </div>
-                            <div class="flex justify-between md:justify-end gap-4">
-                                <span class="text-sm text-gray-500">Metode Pengiriman:</span>
-                                <span class="text-sm font-bold text-gray-900">{{ $order->shipping_courier ?? '-' }} {{ $order->shipping_service ? '('.$order->shipping_service.')' : '' }}</span>
-                            </div>
                             <div class="flex justify-between md:justify-end gap-4 mt-2 pt-2 border-t border-gray-100">
                                 <span class="text-sm text-gray-500">Status Pembayaran:</span>
                                 <span class="inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded {{ $order->getPaymentStatusClass() }}">
@@ -182,10 +178,6 @@ use App\Models\Setting;
                                 <span class="text-gray-500 font-medium">Subtotal Produk</span>
                                 <span class="font-bold text-gray-900">{{ $order->getFormattedSubtotal() }}</span>
                             </div>
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="text-gray-500 font-medium">Ongkos Kirim ({{ $order->shipping_courier ?? '-' }})</span>
-                                <span class="font-bold text-gray-900">{{ $order->getFormattedShippingCost() }}</span>
-                            </div>
                             @if($order->discount_amount > 0)
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-500 font-medium">Diskon</span>
@@ -213,13 +205,13 @@ use App\Models\Setting;
                     <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                         <i class="ph ph-arrows-clockwise ph-bold w-4 h-4"></i>
                     </div>
-                    <h2 class="text-base font-bold text-gray-900">Update Status Resi</h2>
+                    <h2 class="text-base font-bold text-gray-900">Update Status Pesanan</h2>
                 </div>
-                
+
                 <div class="space-y-4">
                     <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-start gap-3">
                         <i class="ph ph-info ph-fill w-5 h-5 text-gray-400 shrink-0 mt-0.5"></i>
-                        <p class="text-xs text-gray-600 leading-relaxed font-medium">Pesanan ini telah lunas dan <strong>sedang diproses paking</strong>. Silakan input nomor resi pengiriman setelah barang diserahkan ke kurir.</p>
+                        <p class="text-xs text-gray-600 leading-relaxed font-medium">Gunakan hanya status inti yang aktif di sistem: <strong>Menunggu Verifikasi</strong>, <strong>Diproses</strong>, <strong>Selesai</strong>, dan <strong>Dibatalkan</strong>.</p>
                     </div>
 
                     <form action="{{ route('admin.orders.update-status', $order) }}" method="POST">
@@ -227,21 +219,21 @@ use App\Models\Setting;
                         @method('PATCH')
                         <div class="space-y-4">
                             <div>
-                                <label class="form-label block mb-1.5">Nomor Resi Pengiriman</label>
-                                <input type="text" name="tracking_number" value="{{ $order->tracking_number }}" placeholder="Masukkan No. Resi (Cth: JNE12345...)" class="form-input w-full">
-                            </div>
-                            <div>
                                 <label class="form-label block mb-1.5">Ubah Status Ke</label>
                                 <select name="status" class="form-input w-full font-medium text-gray-900">
                                     <option value="" disabled>-- Pilih Status Baru --</option>
-                                    @foreach(['processing' => 'Diproses', 'shipped' => 'Dikirim', 'delivered' => 'Terkirim', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'] as $value => $label)
+                                    @foreach(['menunggu_verifikasi' => 'Menunggu Verifikasi', 'processing' => 'Diproses', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'] as $value => $label)
                                         <option value="{{ $value }}" {{ $order->status === $value ? 'selected' : '' }}>{{ $label }}</option>
                                     @endforeach
                                 </select>
                             </div>
+                            <div>
+                                <label class="form-label block mb-1.5">Catatan Admin <span class="text-gray-400 font-normal ml-1">(Opsional)</span></label>
+                                <textarea name="notes" rows="3" class="form-input w-full resize-none" placeholder="Tambahkan catatan jika diperlukan"></textarea>
+                            </div>
                         </div>
                         <button type="submit" class="btn-primary w-full mt-5 h-10 shadow-md">
-                            <i class="ph ph-paper-plane-tilt ph-bold w-4 h-4 mr-1"></i> Simpan & Kirim Notif
+                            <i class="ph ph-paper-plane-tilt ph-bold w-4 h-4 mr-1"></i> Simpan Status
                         </button>
                     </form>
                 </div>
@@ -261,8 +253,8 @@ use App\Models\Setting;
                             @php
                                 $color = match($history->status) {
                                     'completed' => 'green',
-                                    'shipped', 'delivered' => 'blue',
-                                    'processing' => 'orange',
+                                    'processing' => 'blue',
+                                    'menunggu_verifikasi' => 'orange',
                                     'cancelled', 'failed' => 'red',
                                     default => 'gray'
                                 };

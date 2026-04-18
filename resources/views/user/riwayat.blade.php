@@ -24,41 +24,38 @@
             <h1 class="text-[28px] md:text-3xl font-bold text-gray-900 tracking-tight">Riwayat Pembelian</h1>
             <p class="text-gray-500 mt-2 text-sm">Kelola dan pantau status pesanan belanja Anda.</p>
         </div>
-        <div class="flex items-center gap-3">
-            <button class="bg-white border border-gray-200 px-4 py-2.5 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors shadow-sm flex items-center gap-2 font-medium focus:outline-none h-10">
-                <i class="ph ph-faders w-5 h-5"></i>
-                Opsi Tampilan
-                <i class="ph ph-caret-down w-3.5 h-3.5 ml-1 text-gray-400"></i>
-            </button>
-        </div>
     </div>
+
+    @php
+        $currentStatus = request('status', 'semua');
+    @endphp
 
     <!-- Filter Status Tabs -->
     <div class="border-b border-gray-200">
         <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 overflow-x-auto scrollbar-hide">
             <li class="me-2">
-                <a href="{{ route('user.orders.index', ['status' => 'semua']) }}" class="inline-flex items-center justify-center p-4 text-primary-600 border-b-2 border-primary-600 rounded-t-lg active bg-primary-50/50" aria-current="page">
+                <a href="{{ route('user.orders.index', ['status' => 'semua']) }}" class="inline-flex items-center justify-center p-4 {{ $currentStatus === 'semua' ? 'text-primary-600 border-b-2 border-primary-600 rounded-t-lg active bg-primary-50/50' : 'border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 transition-all' }}">
                     Semua Pesanan
                 </a>
             </li>
             <li class="me-2">
-                <a href="{{ route('user.orders.index', ['status' => 'menunggu-pembayaran']) }}" class="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 transition-all">
-                    Menunggu Pembayaran
+                <a href="{{ route('user.orders.index', ['status' => 'menunggu-verifikasi']) }}" class="inline-flex items-center justify-center p-4 {{ $currentStatus === 'menunggu-verifikasi' ? 'text-primary-600 border-b-2 border-primary-600 rounded-t-lg active bg-primary-50/50' : 'border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 transition-all' }}">
+                    Menunggu Verifikasi
                 </a>
             </li>
             <li class="me-2">
-                <a href="{{ route('user.orders.index', ['status' => 'diproses']) }}" class="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 transition-all">
+                <a href="{{ route('user.orders.index', ['status' => 'diproses']) }}" class="inline-flex items-center justify-center p-4 {{ $currentStatus === 'diproses' ? 'text-primary-600 border-b-2 border-primary-600 rounded-t-lg active bg-primary-50/50' : 'border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 transition-all' }}">
                     Diproses
                 </a>
             </li>
             <li class="me-2">
-                <a href="{{ route('user.orders.index', ['status' => 'siap-diambil']) }}" class="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 transition-all">
-                    Siap Diambil
+                <a href="{{ route('user.orders.index', ['status' => 'selesai']) }}" class="inline-flex items-center justify-center p-4 {{ $currentStatus === 'selesai' ? 'text-primary-600 border-b-2 border-primary-600 rounded-t-lg active bg-primary-50/50' : 'border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 transition-all' }}">
+                    Selesai
                 </a>
             </li>
             <li class="me-2">
-                <a href="{{ route('user.orders.index', ['status' => 'selesai']) }}" class="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 transition-all">
-                    Selesai
+                <a href="{{ route('user.orders.index', ['status' => 'dibatalkan']) }}" class="inline-flex items-center justify-center p-4 {{ $currentStatus === 'dibatalkan' ? 'text-primary-600 border-b-2 border-primary-600 rounded-t-lg active bg-primary-50/50' : 'border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 transition-all' }}">
+                    Dibatalkan
                 </a>
             </li>
         </ul>
@@ -152,11 +149,6 @@
                             @elseif($order->isProcessing() || $order->isMenungguVerifikasi())
                             <a href="{{ route('user.orders.show', $order) }}" class="btn-secondary mt-3 text-xs py-2 px-3 inline-block">
                                 Pantau Pesanan
-                            </a>
-                            @elseif($order->isDelivered())
-                            <a href="{{ route('user.payments.qr-code', $order) }}" class="btn-primary mt-3 text-xs py-2 px-3 inline-flex items-center gap-1 shadow-sm">
-                                <i class="ph ph-qr-code ph-bold"></i>
-                                Lihat QR Code
                             </a>
                             @else
                             <a href="{{ route('user.orders.show', $order) }}" class="btn-secondary mt-3 text-xs py-2 px-3 inline-block">
