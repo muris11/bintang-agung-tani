@@ -18,7 +18,9 @@ class OrderController extends Controller
 
   public function index(Request $request): View
   {
-    $query = Order::with(['user']);
+    $query = Order::with(['user' => function($q) {
+      $q->withTrashed();
+    }]);
 
     // Filter by status
     if ($request->filled('status')) {
@@ -88,7 +90,9 @@ class OrderController extends Controller
 
   public function show(Order $order): View
   {
-    $order->load(['items', 'statusHistories', 'user', 'address', 'activityLogs.user']);
+    $order->load(['items', 'statusHistories', 'user' => function($q) {
+      $q->withTrashed();
+    }, 'address', 'activityLogs.user']);
 
     return view('admin.detail-pesanan', compact('order'));
   }
@@ -197,7 +201,9 @@ class OrderController extends Controller
    */
   public function bulkUpdateStatusPage(Request $request): View
   {
-    $query = Order::with(['user'])->orderBy('created_at', 'desc');
+    $query = Order::with(['user' => function($q) {
+      $q->withTrashed();
+    }])->orderBy('created_at', 'desc');
 
     // Filter by status
     if ($request->filled('status')) {

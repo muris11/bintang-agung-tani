@@ -17,7 +17,9 @@ class PaymentVerificationController extends Controller
 
     public function index(Request $request): View
     {
-        $query = PaymentProof::with(['order', 'order.items', 'order.items.product', 'user', 'paymentMethod'])
+        $query = PaymentProof::with(['order', 'order.items', 'order.items.product', 'user' => function($q) {
+            $q->withTrashed();
+        }, 'paymentMethod'])
             ->orderBy('created_at', 'desc');
 
         // Filter by status
@@ -45,9 +47,13 @@ class PaymentVerificationController extends Controller
             'order',
             'order.items',
             'order.items.product',
-            'user',
+            'user' => function($q) {
+                $q->withTrashed();
+            },
             'paymentMethod',
-            'verifier',
+            'verifier' => function($q) {
+                $q->withTrashed();
+            },
         ]);
 
         return view('admin.payment-proofs.show', compact('paymentProof'));

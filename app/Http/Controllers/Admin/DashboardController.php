@@ -45,7 +45,9 @@ class DashboardController extends Controller
         $completedOrders = $orderStats->completed;
 
         // Recent orders (last 4) with eager loading for nested relationships
-        $recentOrders = Order::with(['user', 'items.product'])
+        $recentOrders = Order::with(['user' => function($q) {
+            $q->withTrashed();
+        }, 'items.product'])
             ->orderBy('created_at', 'desc')
             ->take(4)
             ->get();

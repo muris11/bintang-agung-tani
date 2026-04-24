@@ -22,7 +22,9 @@ class VerificationController extends Controller
     {
         $status = $request->get('status', 'pending');
 
-        $query = PaymentProof::with(['order', 'user', 'paymentMethod'])
+        $query = PaymentProof::with(['order', 'user' => function($q) {
+            $q->withTrashed();
+        }, 'paymentMethod'])
             ->orderBy('created_at', 'desc');
 
         if (in_array($status, ['pending', 'verified', 'rejected'])) {
@@ -41,7 +43,11 @@ class VerificationController extends Controller
 
     public function show(PaymentProof $payment): View
     {
-        $payment->load(['order', 'order.items', 'order.items.product', 'user', 'paymentMethod', 'verifier']);
+        $payment->load(['order', 'order.items', 'order.items.product', 'user' => function($q) {
+            $q->withTrashed();
+        }, 'paymentMethod', 'verifier' => function($q) {
+            $q->withTrashed();
+        }]);
 
         return view('admin.detail-verifikasi', compact('payment'));
     }
